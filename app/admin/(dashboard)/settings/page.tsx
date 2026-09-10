@@ -1,10 +1,18 @@
-export default function AdminSettingsPage() {
+import { getSiteSettings } from "@/lib/sections";
+import ContactSettingsForm from "@/components/admin/ContactSettingsForm";
+
+export default async function AdminSettingsPage() {
+  const settings = await getSiteSettings();
+
   return (
-    <div className="flex max-w-2xl flex-col gap-4">
-      <h1 className="font-display text-2xl text-foreground">Settings</h1>
-      <p className="text-sm text-muted">
-        Global contact info, socials, and SEO meta editor coming next.
-      </p>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="font-display text-2xl text-foreground">Settings</h1>
+        <p className="mt-1 text-sm text-muted">
+          Contact info and social links shown in the site footer.
+        </p>
+      </div>
+      <ContactSettingsForm settings={settings} />
     </div>
   );
 }
