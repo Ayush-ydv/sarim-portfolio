@@ -20,16 +20,18 @@ async function main() {
     update: {},
     create: {
       id: "singleton",
-      heroNameLine1: "Your",
-      heroNameLine2: "Name",
-      heroTagline: "Editor · Voiceover Artist",
+      heroNameLine1: "Sarim",
+      heroNameLine2: "Khan",
+      heroTagline: "Video Editor & Storyteller",
       bioText:
-        "Write a short bio here — a couple of sentences about who you are and what you do. Edit this from /admin/home.",
+        "I'm a video editor with 6+ years of experience cutting commercials, brand documentaries, and music videos for clients ranging from independent artists to global brands. I specialize in narrative pacing, color grading, and sound design — turning raw footage into stories that hold attention from the first frame to the last.",
       philosophyText:
-        "Write your creative philosophy or approach here. Edit this from /admin/home.",
-      ctaText: "Let's make something together!",
-      email: "hello@example.com",
-      phone: "+1 (555) 000-0000",
+        "Great editing is invisible. My job isn't to show off a cut — it's to serve the story, the rhythm, and the emotion the footage is already carrying. I obsess over pacing, breathe with the music, and never let a transition call attention to itself unless the story asks for it. Every project starts with one question: what does this need to feel like?",
+      ctaText: "Have a project in mind? Let's cut something great together.",
+      email: "hello@sarimkhan.com",
+      phone: "+1 (415) 555-0148",
+      instagramUrl: "https://instagram.com/sarimkhan.edits",
+      vimeoUrl: "https://vimeo.com/sarimkhan",
     },
   });
 
@@ -53,21 +55,30 @@ async function main() {
       data: [
         {
           sectionId: editing.id,
-          title: "Client // Project One // 2025",
-          roleLabel: "Editor",
-          description: "Placeholder description for this project. Edit from /admin/sections.",
+          title: "Northwind Outfitters // Fall Campaign Film // 2025",
+          roleLabel: "Lead Editor",
+          description:
+            "A 90-second brand film for Northwind's fall collection launch. Cut for pace and texture — matching the edit rhythm to a driving score while keeping the product moments clean and confident.",
           mediaType: MediaType.EMBED,
-          mediaUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
           order: 1,
         },
         {
           sectionId: editing.id,
-          title: "Client // Project Two // 2025",
-          roleLabel: "Editor",
-          description: "Placeholder description for this project. Edit from /admin/sections.",
+          title: "The Long Way Home // Documentary Short // 2024",
+          roleLabel: "Editor & Colorist",
+          description:
+            "A 12-minute character-driven documentary following a former long-haul trucker's cross-country return home. Structured the story from 40+ hours of interview and verite footage, and handled the full color grade.",
           mediaType: MediaType.EMBED,
-          mediaUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
           order: 2,
+        },
+        {
+          sectionId: editing.id,
+          title: 'Nadia Ray // "Static" Music Video // 2024',
+          roleLabel: "Editor",
+          description:
+            "Performance-driven music video cut to hit every beat of the track. Intercut three performance takes and one narrative thread to build momentum toward the final chorus.",
+          mediaType: MediaType.EMBED,
+          order: 3,
         },
       ],
     });
@@ -100,19 +111,22 @@ async function main() {
         {
           resumeDataId: resumeData.id,
           heading: "Experience",
-          body: "Placeholder experience entry. Edit from /admin/sections.",
+          body:
+            "Senior Video Editor, Freelance (2021–Present) — Cut commercial, documentary, and branded content for clients including Northwind Outfitters, independent musicians, and regional agencies. Lead editor on projects from concept through final color and delivery.\n\nVideo Editor, Bright Field Studios (2018–2021) — Edited social and broadcast spots for a mid-size production studio, working across a fast-turnaround client roster of 15+ brands.",
           order: 1,
         },
         {
           resumeDataId: resumeData.id,
           heading: "Education",
-          body: "Placeholder education entry. Edit from /admin/sections.",
+          body:
+            "B.F.A. in Film & Television Production, San Francisco State University (2014–2018) — Focused on narrative editing and post-production workflow.",
           order: 2,
         },
         {
           resumeDataId: resumeData.id,
           heading: "Skills",
-          body: "Placeholder skills entry. Edit from /admin/sections.",
+          body:
+            "Adobe Premiere Pro, DaVinci Resolve, After Effects, Avid Media Composer, color grading, sound design, motion graphics, story structure, client collaboration.",
           order: 3,
         },
       ],
@@ -137,7 +151,8 @@ async function main() {
     create: {
       sectionId: about.id,
       heading: "About",
-      bodyText: "Placeholder about text. Edit this from /admin/sections.",
+      bodyText:
+        "I'm Sarim, a video editor based in San Francisco. Over the past six years I've cut everything from 30-second social spots to feature-length documentaries, working with agencies, independent filmmakers, and musicians who need someone to shape their footage into something that actually lands. I trained in narrative film editing before moving into commercial and branded work, and I still approach every project — no matter how short — like it's telling a story. When I'm not in the timeline, I'm usually shooting film photography or chasing down a new documentary to watch.",
     },
   });
 

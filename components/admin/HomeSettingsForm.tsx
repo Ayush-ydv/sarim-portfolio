@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { SiteSettings } from "@prisma/client";
 import { updateHomeContent, type HomeContentInput } from "@/lib/actions/settings";
+import FileUploadField from "@/components/admin/FileUploadField";
 
 function Field({
   label,
@@ -89,10 +90,12 @@ export default function HomeSettingsForm({
         value={form.heroTagline}
         onChange={(v) => set("heroTagline", v)}
       />
-      <Field
-        label="Hero image URL"
+      <FileUploadField
+        label="Hero image"
         value={form.heroImageUrl}
         onChange={(v) => set("heroImageUrl", v)}
+        resourceType="image"
+        accept="image/*"
       />
       <Field
         label="Bio text"
@@ -101,10 +104,12 @@ export default function HomeSettingsForm({
         textarea
         rows={5}
       />
-      <Field
-        label="Bio image URL"
+      <FileUploadField
+        label="Bio image"
         value={form.bioImageUrl}
         onChange={(v) => set("bioImageUrl", v)}
+        resourceType="image"
+        accept="image/*"
       />
       <Field
         label="Philosophy text"

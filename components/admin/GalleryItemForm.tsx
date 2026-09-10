@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import type { GalleryItem } from "@prisma/client";
 import type { GalleryItemInput } from "@/lib/actions/gallery";
+import VideoUploader from "@/components/admin/VideoUploader";
+import FileUploadField from "@/components/admin/FileUploadField";
 
 const mediaTypeOptions: { value: GalleryItemInput["mediaType"]; label: string }[] = [
   { value: "EMBED", label: "Embed URL (YouTube/Vimeo)" },
@@ -27,6 +29,8 @@ export default function GalleryItemForm({
     item?.mediaType ?? "EMBED",
   );
   const [mediaUrl, setMediaUrl] = useState(item?.mediaUrl ?? "");
+  const [streamVideoId, setStreamVideoId] = useState(item?.streamVideoId ?? "");
+  const [thumbnailUrl, setThumbnailUrl] = useState(item?.thumbnailUrl ?? "");
   const [published, setPublished] = useState(item?.published ?? true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -44,6 +48,8 @@ export default function GalleryItemForm({
               description,
               mediaType,
               mediaUrl,
+              streamVideoId,
+              thumbnailUrl,
               published,
             });
           } catch (err) {
@@ -106,7 +112,7 @@ export default function GalleryItemForm({
             ))}
           </select>
         </div>
-        {mediaType !== "VIDEO_UPLOAD" && (
+        {(mediaType === "EMBED" || mediaType === "LINK") && (
           <div className="flex flex-1 flex-col gap-1">
             <label className="text-xs uppercase tracking-[0.18em] text-muted">
               {mediaType === "LINK" ? "Article URL" : "Media URL"}
@@ -119,11 +125,28 @@ export default function GalleryItemForm({
             />
           </div>
         )}
+        {mediaType === "AUDIO" && (
+          <div className="flex-1">
+            <FileUploadField
+              label="Audio file"
+              value={mediaUrl}
+              onChange={setMediaUrl}
+              resourceType="video"
+              accept="audio/*"
+            />
+          </div>
+        )}
       </div>
       {mediaType === "VIDEO_UPLOAD" && (
-        <p className="text-xs text-muted">
-          Direct video upload isn&apos;t wired up yet — coming in a later phase.
-        </p>
+        <VideoUploader
+          streamVideoId={streamVideoId}
+          thumbnailUrl={thumbnailUrl}
+          onUploaded={(data) => {
+            setStreamVideoId(data.streamVideoId);
+            setMediaUrl(data.mediaUrl);
+            setThumbnailUrl(data.thumbnailUrl);
+          }}
+        />
       )}
       <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted">
         <input

@@ -23,6 +23,7 @@ import {
   deleteQuickLink,
   reorderQuickLinks,
 } from "@/lib/actions/settings";
+import FileUploadField from "@/components/admin/FileUploadField";
 
 function QuickLinkRow({ link }: { link: QuickLink }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -62,14 +63,13 @@ function QuickLinkRow({ link }: { link: QuickLink }) {
           className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1">
-        <label className="text-xs uppercase tracking-[0.18em] text-muted">
-          Thumbnail URL
-        </label>
-        <input
+      <div className="min-w-[220px] flex-1">
+        <FileUploadField
+          label="Thumbnail"
           value={thumbnailUrl}
-          onChange={(e) => setThumbnailUrl(e.target.value)}
-          className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+          onChange={setThumbnailUrl}
+          resourceType="image"
+          accept="image/*"
         />
       </div>
       <button

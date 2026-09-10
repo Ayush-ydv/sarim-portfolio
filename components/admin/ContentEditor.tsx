@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { SectionContent } from "@prisma/client";
 import { updateSectionContent } from "@/lib/actions/content";
+import FileUploadField from "@/components/admin/FileUploadField";
 
 export default function ContentEditor({
   sectionId,
@@ -50,17 +51,13 @@ export default function ContentEditor({
           className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-xs uppercase tracking-[0.18em] text-muted">
-          Image URL
-        </label>
-        <input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://…"
-          className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
-        />
-      </div>
+      <FileUploadField
+        label="Image"
+        value={imageUrl}
+        onChange={setImageUrl}
+        resourceType="image"
+        accept="image/*"
+      />
       <div className="flex items-center gap-4">
         <button
           type="submit"

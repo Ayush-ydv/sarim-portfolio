@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { ResumeEntry } from "@prisma/client";
+import FileUploadField from "@/components/admin/FileUploadField";
 import ResumeEntryForm, {
   type ResumeEntryInput,
 } from "@/components/admin/ResumeEntryForm";
@@ -145,15 +146,13 @@ export default function ResumeEditor({
         }}
         className="flex flex-wrap items-end gap-3 border border-rule p-4"
       >
-        <div className="flex flex-1 flex-col gap-1">
-          <label className="text-xs uppercase tracking-[0.18em] text-muted">
-            Resume PDF URL (optional)
-          </label>
-          <input
+        <div className="flex-1">
+          <FileUploadField
+            label="Resume PDF (optional)"
             value={resumeFileUrl}
-            onChange={(e) => setResumeFileUrl(e.target.value)}
-            placeholder="https://…"
-            className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            onChange={setResumeFileUrl}
+            resourceType="raw"
+            accept="application/pdf"
           />
         </div>
         <button

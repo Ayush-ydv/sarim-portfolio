@@ -1,7 +1,7 @@
 import type { GalleryItem } from "@prisma/client";
 
 function Media({ item }: { item: GalleryItem }) {
-  if (item.mediaType === "EMBED" && item.mediaUrl) {
+  if ((item.mediaType === "EMBED" || item.mediaType === "VIDEO_UPLOAD") && item.mediaUrl) {
     return (
       <div className="aspect-video w-full overflow-hidden bg-foreground/5">
         <iframe

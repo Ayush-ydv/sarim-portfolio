@@ -10,6 +10,8 @@ export type GalleryItemInput = {
   description: string;
   mediaType: MediaType;
   mediaUrl: string;
+  streamVideoId?: string;
+  thumbnailUrl?: string;
   published: boolean;
 };
 
@@ -40,6 +42,8 @@ export async function createGalleryItem(
       description: data.description,
       mediaType: data.mediaType,
       mediaUrl: data.mediaUrl || null,
+      streamVideoId: data.streamVideoId || null,
+      thumbnailUrl: data.thumbnailUrl || null,
       published: data.published,
       order: (maxOrder._max.order ?? 0) + 1,
     },
@@ -62,6 +66,8 @@ export async function updateGalleryItem(
       description: data.description,
       mediaType: data.mediaType,
       mediaUrl: data.mediaUrl || null,
+      streamVideoId: data.streamVideoId || null,
+      thumbnailUrl: data.thumbnailUrl || null,
       published: data.published,
     },
   });
