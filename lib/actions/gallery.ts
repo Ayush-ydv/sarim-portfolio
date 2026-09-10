@@ -1,0 +1,87 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { MediaType } from "@prisma/client";
+
+export type GalleryItemInput = {
+  title: string;
+  roleLabel: string;
+  description: string;
+  mediaType: MediaType;
+  mediaUrl: string;
+  published: boolean;
+};
+
+async function revalidateSection(sectionId: string) {
+  const section = await prisma.section.findUniqueOrThrow({
+    where: { id: sectionId },
+  });
+  revalidatePath(`/${section.slug}`);
+  revalidatePath("/", "layout");
+}
+
+export async function createGalleryItem(
+  sectionId: string,
+  data: GalleryItemInput,
+) {
+  if (!data.title.trim()) throw new Error("Title is required");
+
+  const maxOrder = await prisma.galleryItem.aggregate({
+    where: { sectionId },
+    _max: { order: true },
+  });
+
+  await prisma.galleryItem.create({
+    data: {
+      sectionId,
+      title: data.title,
+      roleLabel: data.roleLabel || null,
+      description: data.description,
+      mediaType: data.mediaType,
+      mediaUrl: data.mediaUrl || null,
+      published: data.published,
+      order: (maxOrder._max.order ?? 0) + 1,
+    },
+  });
+
+  await revalidateSection(sectionId);
+}
+
+export async function updateGalleryItem(
+  id: string,
+  data: GalleryItemInput,
+) {
+  if (!data.title.trim()) throw new Error("Title is required");
+
+  const item = await prisma.galleryItem.update({
+    where: { id },
+    data: {
+      title: data.title,
+      roleLabel: data.roleLabel || null,
+      description: data.description,
+      mediaType: data.mediaType,
+      mediaUrl: data.mediaUrl || null,
+      published: data.published,
+    },
+  });
+
+  await revalidateSection(item.sectionId);
+}
+
+export async function deleteGalleryItem(id: string) {
+  const item = await prisma.galleryItem.delete({ where: { id } });
+  await revalidateSection(item.sectionId);
+}
+
+export async function reorderGalleryItems(
+  sectionId: string,
+  orderedIds: string[],
+) {
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.galleryItem.update({ where: { id }, data: { order: index + 1 } }),
+    ),
+  );
+  await revalidateSection(sectionId);
+}
