@@ -1,8 +1,20 @@
 import { PrismaClient, SectionType, MediaType } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {},
+      create: { email: adminEmail, passwordHash },
+    });
+  }
+
   await prisma.siteSettings.upsert({
     where: { id: "singleton" },
     update: {},
