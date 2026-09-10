@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// Fixed, non-deletable home page content + global settings
+model SiteSettings {
+  id             String  @id @default("singleton")
+  heroImageUrl   String?
+  heroNameLine1  String  @default("")
+  heroNameLine2  String  @default("")
+  heroTagline    String  @default("")
+  bioImageUrl    String?
+  bioText        String  @db.Text
+  philosophyText String  @db.Text
+  ctaText        String  @default("Let's make something together!")
+  email          String
+  phone          String
+  instagramUrl   String?
+  vimeoUrl       String?
+
+  quickLinks QuickLink[]
+}
+
+model QuickLink {
+  id             String       @id @default(cuid())
+  siteSettingsId String       @default("singleton")
+  siteSettings   SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  url            String
+  thumbnailUrl   String?
+  order          Int          @default(0)
+}
+
+enum SectionType {
+  GALLERY // repeating work-item units (Editing portfolio, Voiceover portfolio, etc.)
+  CONTENT // freeform text + image (About, or any custom page)
+  RESUME // structured CV entries + optional PDF
+}
+
+// The addable/removable/reorderable nav sections
+model Section {
+  id        String      @id @default(cuid())
+  slug      String      @unique // e.g. "editing-portfolio" -> /editing-portfolio
+  navLabel  String // e.g. "Editing portfolio"
+  type      SectionType
+  order     Int         @default(0)
+  isVisible Boolean     @default(true) // hidden = stays in DB, drops off nav + route 404s
+  createdAt DateTime    @default(now())
+
+  content      SectionContent?
+  galleryItems GalleryItem[]
+  resume       ResumeData?
+}
+
+model SectionContent {
+  id        String  @id @default(cuid())
+  sectionId String  @unique
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  heading   String?
+  bodyText  String  @db.Text
+  imageUrl  String?
+}
+
+enum MediaType {
+  EMBED // pasted YouTube/Vimeo URL
+  VIDEO_UPLOAD // video file uploaded directly, hosted on Cloudflare Stream
+  AUDIO // uploaded audio file (Cloudinary)
+  LINK // external article, no player
+}
+
+model GalleryItem {
+  id            String    @id @default(cuid())
+  sectionId     String
+  section       Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  title         String
+  roleLabel     String? // e.g. "Narration voiceover" — optional, reusable for any gallery
+  description   String    @db.Text
+  mediaType     MediaType @default(EMBED)
+  mediaUrl      String? // embed URL or article link
+  streamVideoId String? // Cloudflare Stream video UID, set when mediaType = VIDEO_UPLOAD
+  thumbnailUrl  String? // auto-filled from Stream's generated thumbnail when uploaded
+  order         Int       @default(0)
+  published     Boolean   @default(true)
+}
+
+model ResumeData {
+  id            String        @id @default(cuid())
+  sectionId     String        @unique
+  section       Section       @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  resumeFileUrl String? // optional uploaded PDF, shown as a download/embed
+  entries       ResumeEntry[]
+}
+
+model ResumeEntry {
+  id           String     @id @default(cuid())
+  resumeDataId String
+  resumeData   ResumeData @relation(fields: [resumeDataId], references: [id], onDelete: Cascade)
+  heading      String // "Experience", "Education", "Skills"...
+  body         String     @db.Text
+  order        Int        @default(0)
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+}
