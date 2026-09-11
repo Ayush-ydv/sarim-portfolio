@@ -57,7 +57,7 @@ export default function ContentEditor({
         onChange={setImageUrl}
         resourceType="auto"
         accept="image/*,video/*"
-        hint="Videos play muted on a loop — short clips (10–20s) load fastest."
+        hint="Videos and YouTube/Vimeo links play muted on a loop — short clips (10–20s) load fastest."
       />
       <div className="flex items-center gap-4">
         <button

@@ -1,6 +1,7 @@
 import SmartImage from "@/components/SmartImage";
 import LoopVideo from "@/components/motion/LoopVideo";
-import { isVideoUrl } from "@/lib/media";
+import BackgroundEmbed from "@/components/motion/BackgroundEmbed";
+import { backgroundEmbedUrl, isVideoUrl } from "@/lib/media";
 
 // Admin media fields accept either a still or a short clip. Videos become
 // muted loops; everything else goes through SmartImage. Always fills its
@@ -19,6 +20,11 @@ export default function SmartMedia({
   className?: string;
 }) {
   const value = src.trim();
+
+  const embed = backgroundEmbedUrl(value);
+  if (embed) {
+    return <BackgroundEmbed {...embed} className={className} />;
+  }
 
   if (isVideoUrl(value)) {
     if (!/^(https?:\/\/|\/(?!\/))/i.test(value)) return null;

@@ -66,7 +66,7 @@ function QuickLinkRow({ link }: { link: QuickLink }) {
       </div>
       <div className="min-w-[220px] flex-1">
         <FileUploadField
-          label="Thumbnail (image or video)"
+          label="Thumbnail (image, video, or YouTube/Vimeo link)"
           value={thumbnailUrl}
           onChange={setThumbnailUrl}
           resourceType="auto"

@@ -6,7 +6,7 @@ import { updateHomeContent, type HomeContentInput } from "@/lib/actions/settings
 import FileUploadField from "@/components/admin/FileUploadField";
 
 const MEDIA_HINT =
-  "Image or video. Videos play muted on a loop — short clips (10–20s) load fastest.";
+  "Image or video. Videos and YouTube/Vimeo links play muted on a loop — short clips (10–20s) load fastest.";
 
 function Field({
   label,

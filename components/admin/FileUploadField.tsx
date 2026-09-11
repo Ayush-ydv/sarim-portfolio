@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { isVideoUrl } from "@/lib/media";
+import { backgroundEmbedUrl, isVideoUrl } from "@/lib/media";
 
 // Cloudinary free-plan per-file limits (audio counts as video).
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -42,8 +42,24 @@ function uploadWithProgress(
 
 function Preview({ value, resourceType }: { value: string; resourceType: ResourceType }) {
   const src = value.trim();
-  if (!/^(https?:\/\/|\/(?!\/))/i.test(src)) return null;
   const className = "h-28 w-auto max-w-full rounded border border-rule object-cover";
+
+  const embed = backgroundEmbedUrl(src);
+  if (embed) {
+    // A plain iframe preview (no overscale/lazy-mount needed at this size).
+    return (
+      <iframe
+        src={embed.embedUrl}
+        title=""
+        aria-hidden
+        tabIndex={-1}
+        allow="autoplay; encrypted-media"
+        className={`${className} aspect-video h-28 w-auto`}
+      />
+    );
+  }
+
+  if (!/^(https?:\/\/|\/(?!\/))/i.test(src)) return null;
 
   if (isVideoUrl(src)) {
     return <video src={src} muted loop autoPlay playsInline className={className} />;
@@ -124,7 +140,7 @@ export default function FileUploadField({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="https://… or upload a file below"
+        placeholder="Paste a YouTube/Vimeo link, an image/video URL, or upload below"
         className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
       />
       <input

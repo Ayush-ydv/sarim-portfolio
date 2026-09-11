@@ -88,3 +88,39 @@ export function videoPosterUrl(url: string) {
     .replace("/video/upload/", "/video/upload/so_0,q_auto,w_1600,c_limit/")
     .replace(FILE_EXTENSION, ".jpg");
 }
+
+export type BackgroundEmbed = {
+  kind: "youtube" | "vimeo";
+  embedUrl: string;
+  posterUrl: string | null;
+};
+
+// Turns a pasted YouTube/Vimeo link (watch page, share link, or embed link —
+// youtubeId/vimeoId above already accept all three) into a background-loop
+// embed: autoplaying, muted, no controls, looping a single video.
+export function backgroundEmbedUrl(url: string): BackgroundEmbed | null {
+  const yt = youtubeId(url);
+  if (yt) {
+    return {
+      kind: "youtube",
+      embedUrl:
+        `https://www.youtube-nocookie.com/embed/${yt}` +
+        `?autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0` +
+        `&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3`,
+      posterUrl: `https://i.ytimg.com/vi/${yt}/hqdefault.jpg`,
+    };
+  }
+
+  const vm = vimeoId(url);
+  if (vm) {
+    // Vimeo's background=1 param does the cover-crop + mute + loop itself,
+    // so no CSS overscale is needed for this branch.
+    return {
+      kind: "vimeo",
+      embedUrl: `https://player.vimeo.com/video/${vm}?background=1&autoplay=1&loop=1&muted=1`,
+      posterUrl: null,
+    };
+  }
+
+  return null;
+}
