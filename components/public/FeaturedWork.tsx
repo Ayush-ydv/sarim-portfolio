@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/SmartImage";
 import Link from "next/link";
 import type { GalleryItem } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";

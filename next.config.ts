@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
+import { optimizedImageHosts } from "./lib/imageHosts";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "https", hostname: "i.ytimg.com" },
-      { protocol: "https", hostname: "**.cloudflarestream.com" },
-      { protocol: "https", hostname: "videodelivery.net" },
-    ],
+    remotePatterns: optimizedImageHosts.map((hostname) => ({
+      protocol: "https" as const,
+      hostname,
+    })),
   },
 };
 

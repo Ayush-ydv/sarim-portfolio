@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/SmartImage";
 import { getFeaturedWork, getSiteSettings } from "@/lib/sections";
 import Reveal from "@/components/motion/Reveal";
 import Hero from "@/components/public/Hero";

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/SmartImage";
 import { useRef } from "react";
 import {
   motion,
