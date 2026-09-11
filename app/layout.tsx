@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { Fraunces } from "next/font/google";
+import { Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -8,22 +7,25 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+// Loaded as a variable font with optical sizing, so display sizes get the
+// high-contrast cut automatically.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
   style: ["normal", "italic"],
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
 export const metadata: Metadata = {
   title: "Portfolio",
-  description: "Editing, voiceover, and creative work.",
+  description: "Video editing portfolio.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

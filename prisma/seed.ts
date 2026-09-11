@@ -32,8 +32,45 @@ async function main() {
       phone: "+1 (415) 555-0148",
       instagramUrl: "https://instagram.com/sarimkhan.edits",
       vimeoUrl: "https://vimeo.com/sarimkhan",
+      servicesHeading: "Editing for brands, artists, and storytellers.",
     },
   });
+
+  if ((await prisma.stat.count()) === 0) {
+    await prisma.stat.createMany({
+      data: [
+        { value: "6+", label: "Years editing", order: 1 },
+        { value: "120+", label: "Projects delivered", order: 2 },
+        { value: "40+", label: "Brands & artists", order: 3 },
+        { value: "15M+", label: "Views across platforms", order: 4 },
+      ],
+    });
+  }
+
+  if ((await prisma.service.count()) === 0) {
+    await prisma.service.createMany({
+      data: [
+        {
+          title: "Commercial & Brand",
+          description:
+            "Launch films, product spots, and social cutdowns built for pace — every frame earning its place in 15, 30, or 90 seconds.",
+          order: 1,
+        },
+        {
+          title: "Documentary",
+          description:
+            "Finding the story in hours of interviews and verité footage, then shaping it into something with structure, tension, and heart.",
+          order: 2,
+        },
+        {
+          title: "Music Videos",
+          description:
+            "Cutting on the beat and against it — performance and narrative intercut to build momentum all the way to the final chorus.",
+          order: 3,
+        },
+      ],
+    });
+  }
 
   const editing = await prisma.section.upsert({
     where: { slug: "editing-portfolio" },

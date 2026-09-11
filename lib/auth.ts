@@ -30,3 +30,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
 });
+
+// Server actions can be invoked outside the proxy's /admin matcher, so every
+// mutating action must check the session itself.
+export async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+}

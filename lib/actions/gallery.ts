@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { MediaType } from "@prisma/client";
 
 export type GalleryItemInput = {
@@ -27,6 +28,7 @@ export async function createGalleryItem(
   sectionId: string,
   data: GalleryItemInput,
 ) {
+  await requireAdmin();
   if (!data.title.trim()) throw new Error("Title is required");
 
   const maxOrder = await prisma.galleryItem.aggregate({
@@ -56,6 +58,7 @@ export async function updateGalleryItem(
   id: string,
   data: GalleryItemInput,
 ) {
+  await requireAdmin();
   if (!data.title.trim()) throw new Error("Title is required");
 
   const item = await prisma.galleryItem.update({
@@ -76,6 +79,7 @@ export async function updateGalleryItem(
 }
 
 export async function deleteGalleryItem(id: string) {
+  await requireAdmin();
   const item = await prisma.galleryItem.delete({ where: { id } });
   await revalidateSection(item.sectionId);
 }
@@ -84,6 +88,7 @@ export async function reorderGalleryItems(
   sectionId: string,
   orderedIds: string[],
 ) {
+  await requireAdmin();
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.galleryItem.update({ where: { id }, data: { order: index + 1 } }),

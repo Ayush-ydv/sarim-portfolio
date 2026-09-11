@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 async function revalidateSection(sectionId: string) {
   const section = await prisma.section.findUniqueOrThrow({
@@ -12,6 +13,7 @@ async function revalidateSection(sectionId: string) {
 }
 
 export async function updateResumeFile(sectionId: string, resumeFileUrl: string) {
+  await requireAdmin();
   await prisma.section.update({
     where: { id: sectionId },
     data: {
@@ -31,6 +33,7 @@ export async function createResumeEntry(
   sectionId: string,
   data: { heading: string; body: string },
 ) {
+  await requireAdmin();
   if (!data.heading.trim()) throw new Error("Heading is required");
 
   const maxOrder = await prisma.resumeEntry.aggregate({
@@ -55,6 +58,7 @@ export async function updateResumeEntry(
   sectionId: string,
   data: { heading: string; body: string },
 ) {
+  await requireAdmin();
   if (!data.heading.trim()) throw new Error("Heading is required");
 
   await prisma.resumeEntry.update({
@@ -66,6 +70,7 @@ export async function updateResumeEntry(
 }
 
 export async function deleteResumeEntry(id: string, sectionId: string) {
+  await requireAdmin();
   await prisma.resumeEntry.delete({ where: { id } });
   await revalidateSection(sectionId);
 }
@@ -75,6 +80,7 @@ export async function reorderResumeEntries(
   sectionId: string,
   orderedIds: string[],
 ) {
+  await requireAdmin();
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.resumeEntry.update({ where: { id }, data: { order: index + 1 } }),

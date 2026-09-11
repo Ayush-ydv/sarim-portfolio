@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { SectionType } from "@prisma/client";
 
 function slugify(input: string) {
@@ -24,6 +25,7 @@ async function uniqueSlug(base: string) {
 }
 
 export async function createSection(navLabel: string, type: SectionType) {
+  await requireAdmin();
   const trimmed = navLabel.trim();
   if (!trimmed) throw new Error("Section name is required");
 
@@ -49,16 +51,19 @@ export async function createSection(navLabel: string, type: SectionType) {
 }
 
 export async function deleteSection(id: string) {
+  await requireAdmin();
   await prisma.section.delete({ where: { id } });
   revalidatePath("/", "layout");
 }
 
 export async function setSectionVisibility(id: string, isVisible: boolean) {
+  await requireAdmin();
   await prisma.section.update({ where: { id }, data: { isVisible } });
   revalidatePath("/", "layout");
 }
 
 export async function reorderSections(orderedIds: string[]) {
+  await requireAdmin();
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.section.update({ where: { id }, data: { order: index + 1 } }),

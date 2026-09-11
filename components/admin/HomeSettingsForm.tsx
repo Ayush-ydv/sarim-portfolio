@@ -55,6 +55,8 @@ export default function HomeSettingsForm({
     bioText: settings.bioText,
     philosophyText: settings.philosophyText,
     ctaText: settings.ctaText,
+    ctaButtonLabel: settings.ctaButtonLabel,
+    servicesHeading: settings.servicesHeading,
   });
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -122,6 +124,16 @@ export default function HomeSettingsForm({
         label="CTA text"
         value={form.ctaText}
         onChange={(v) => set("ctaText", v)}
+      />
+      <Field
+        label="CTA button label"
+        value={form.ctaButtonLabel}
+        onChange={(v) => set("ctaButtonLabel", v)}
+      />
+      <Field
+        label="Services heading"
+        value={form.servicesHeading}
+        onChange={(v) => set("servicesHeading", v)}
       />
       <div className="flex items-center gap-4">
         <button

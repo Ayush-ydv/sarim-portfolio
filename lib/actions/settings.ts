@@ -2,6 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
+
+function revalidateSite() {
+  revalidatePath("/", "layout");
+}
 
 export type HomeContentInput = {
   heroImageUrl: string;
@@ -12,9 +17,12 @@ export type HomeContentInput = {
   bioText: string;
   philosophyText: string;
   ctaText: string;
+  ctaButtonLabel: string;
+  servicesHeading: string;
 };
 
 export async function updateHomeContent(data: HomeContentInput) {
+  await requireAdmin();
   await prisma.siteSettings.update({
     where: { id: "singleton" },
     data: {
@@ -26,9 +34,11 @@ export async function updateHomeContent(data: HomeContentInput) {
       bioText: data.bioText,
       philosophyText: data.philosophyText,
       ctaText: data.ctaText,
+      ctaButtonLabel: data.ctaButtonLabel.trim() || "Book Me",
+      servicesHeading: data.servicesHeading.trim() || "What I do",
     },
   });
-  revalidatePath("/", "layout");
+  revalidateSite();
 }
 
 export type ContactSettingsInput = {
@@ -39,6 +49,7 @@ export type ContactSettingsInput = {
 };
 
 export async function updateContactSettings(data: ContactSettingsInput) {
+  await requireAdmin();
   await prisma.siteSettings.update({
     where: { id: "singleton" },
     data: {
@@ -48,10 +59,11 @@ export async function updateContactSettings(data: ContactSettingsInput) {
       vimeoUrl: data.vimeoUrl || null,
     },
   });
-  revalidatePath("/", "layout");
+  revalidateSite();
 }
 
 export async function createQuickLink(url: string, thumbnailUrl: string) {
+  await requireAdmin();
   const maxOrder = await prisma.quickLink.aggregate({ _max: { order: true } });
   await prisma.quickLink.create({
     data: {
@@ -60,7 +72,7 @@ export async function createQuickLink(url: string, thumbnailUrl: string) {
       order: (maxOrder._max.order ?? 0) + 1,
     },
   });
-  revalidatePath("/", "layout");
+  revalidateSite();
 }
 
 export async function updateQuickLink(
@@ -68,23 +80,92 @@ export async function updateQuickLink(
   url: string,
   thumbnailUrl: string,
 ) {
+  await requireAdmin();
   await prisma.quickLink.update({
     where: { id },
     data: { url, thumbnailUrl: thumbnailUrl || null },
   });
-  revalidatePath("/", "layout");
+  revalidateSite();
 }
 
 export async function deleteQuickLink(id: string) {
+  await requireAdmin();
   await prisma.quickLink.delete({ where: { id } });
-  revalidatePath("/", "layout");
+  revalidateSite();
 }
 
 export async function reorderQuickLinks(orderedIds: string[]) {
+  await requireAdmin();
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.quickLink.update({ where: { id }, data: { order: index + 1 } }),
     ),
   );
-  revalidatePath("/", "layout");
+  revalidateSite();
+}
+
+export async function createStat(value: string, label: string) {
+  await requireAdmin();
+  const maxOrder = await prisma.stat.aggregate({ _max: { order: true } });
+  await prisma.stat.create({
+    data: { value, label, order: (maxOrder._max.order ?? 0) + 1 },
+  });
+  revalidateSite();
+}
+
+export async function updateStat(id: string, value: string, label: string) {
+  await requireAdmin();
+  await prisma.stat.update({ where: { id }, data: { value, label } });
+  revalidateSite();
+}
+
+export async function deleteStat(id: string) {
+  await requireAdmin();
+  await prisma.stat.delete({ where: { id } });
+  revalidateSite();
+}
+
+export async function reorderStats(orderedIds: string[]) {
+  await requireAdmin();
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.stat.update({ where: { id }, data: { order: index + 1 } }),
+    ),
+  );
+  revalidateSite();
+}
+
+export async function createService(title: string, description: string) {
+  await requireAdmin();
+  const maxOrder = await prisma.service.aggregate({ _max: { order: true } });
+  await prisma.service.create({
+    data: { title, description, order: (maxOrder._max.order ?? 0) + 1 },
+  });
+  revalidateSite();
+}
+
+export async function updateService(
+  id: string,
+  title: string,
+  description: string,
+) {
+  await requireAdmin();
+  await prisma.service.update({ where: { id }, data: { title, description } });
+  revalidateSite();
+}
+
+export async function deleteService(id: string) {
+  await requireAdmin();
+  await prisma.service.delete({ where: { id } });
+  revalidateSite();
+}
+
+export async function reorderServices(orderedIds: string[]) {
+  await requireAdmin();
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.service.update({ where: { id }, data: { order: index + 1 } }),
+    ),
+  );
+  revalidateSite();
 }

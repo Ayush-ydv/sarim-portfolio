@@ -30,8 +30,12 @@ model SiteSettings {
   phone          String
   instagramUrl   String?
   vimeoUrl       String?
+  ctaButtonLabel  String  @default("Book Me")
+  servicesHeading String  @default("What I do")
 
   quickLinks QuickLink[]
+  stats      Stat[]
+  services   Service[]
 }
 
 model QuickLink {
@@ -40,6 +44,26 @@ model QuickLink {
   siteSettings   SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
   url            String
   thumbnailUrl   String?
+  order          Int          @default(0)
+}
+
+// Big-number credibility band on the homepage, e.g. "6+" / "Years editing"
+model Stat {
+  id             String       @id @default(cuid())
+  siteSettingsId String       @default("singleton")
+  siteSettings   SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  value          String
+  label          String
+  order          Int          @default(0)
+}
+
+// "What I do" cards on the homepage; titles also feed the scrolling marquee
+model Service {
+  id             String       @id @default(cuid())
+  siteSettingsId String       @default("singleton")
+  siteSettings   SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  title          String
+  description    String       @db.Text
   order          Int          @default(0)
 }
 

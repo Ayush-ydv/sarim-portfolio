@@ -1,22 +1,47 @@
 import type { GalleryItem } from "@prisma/client";
+import Reveal from "@/components/motion/Reveal";
+import VideoPlayer from "@/components/public/VideoPlayer";
+import { paragraphs, splitTitle, toEmbedUrl, videoThumbnail } from "@/lib/media";
 
-function Media({ item }: { item: GalleryItem }) {
-  if ((item.mediaType === "EMBED" || item.mediaType === "VIDEO_UPLOAD") && item.mediaUrl) {
+const tints = ["bg-lavender", "bg-mint", "bg-blush", "bg-sun"];
+
+function Media({
+  item,
+  index,
+  client,
+  project,
+}: {
+  item: GalleryItem;
+  index: number;
+  client: string | null;
+  project: string;
+}) {
+  const tint = tints[index % tints.length];
+
+  if (
+    (item.mediaType === "EMBED" || item.mediaType === "VIDEO_UPLOAD") &&
+    item.mediaUrl
+  ) {
     return (
-      <div className="aspect-video w-full overflow-hidden bg-foreground/5">
-        <iframe
-          src={item.mediaUrl}
-          title={item.title}
-          className="h-full w-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
+      <VideoPlayer
+        embedUrl={toEmbedUrl(item.mediaUrl)}
+        thumbnail={videoThumbnail(item)}
+        title={item.title}
+      />
     );
   }
 
   if (item.mediaType === "AUDIO" && item.mediaUrl) {
-    return <audio src={item.mediaUrl} controls className="w-full" />;
+    return (
+      <div
+        className={`flex aspect-video w-full flex-col justify-end gap-6 rounded-2xl p-8 ${tint}`}
+      >
+        <span className="font-display text-4xl italic leading-tight text-foreground">
+          {project}
+        </span>
+        <audio src={item.mediaUrl} controls className="w-full" />
+      </div>
+    );
   }
 
   if (item.mediaType === "LINK" && item.mediaUrl) {
@@ -25,39 +50,76 @@ function Media({ item }: { item: GalleryItem }) {
         href={item.mediaUrl}
         target="_blank"
         rel="noreferrer"
-        className="inline-block text-xs uppercase tracking-[0.18em] text-muted underline underline-offset-4 transition-colors hover:text-foreground"
+        className={`group flex aspect-video w-full flex-col justify-between rounded-2xl p-8 md:p-10 ${tint}`}
       >
-        Read article →
+        <span className="label-caps text-foreground/70">Article</span>
+        <span className="font-display text-[clamp(2rem,4.5vw,3.75rem)] italic leading-[1.02] text-foreground">
+          {project}
+        </span>
+        <span className="link-sweep self-start text-[0.72rem] font-medium uppercase tracking-[0.2em] text-foreground">
+          Read the article ↗
+        </span>
       </a>
     );
   }
 
   if (item.mediaType === "VIDEO_UPLOAD" && item.streamVideoId) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center bg-foreground/5 text-xs uppercase tracking-[0.18em] text-muted">
-        Video processing
+      <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-foreground/5">
+        <span className="label-caps text-muted">Video processing</span>
       </div>
     );
   }
 
-  return null;
+  // No media yet: a film-style title card keeps the layout intentional.
+  return (
+    <div
+      className={`flex aspect-video w-full flex-col justify-between rounded-2xl p-8 md:p-10 ${tint}`}
+    >
+      <span className="label-caps text-foreground/60">{client ?? "Project"}</span>
+      <span className="font-display text-[clamp(2rem,4.5vw,3.75rem)] italic leading-[1.02] text-foreground">
+        {project}
+      </span>
+    </div>
+  );
 }
 
-export default function GalleryItemCard({ item }: { item: GalleryItem }) {
+export default function GalleryItemCard({
+  item,
+  index,
+}: {
+  item: GalleryItem;
+  index: number;
+}) {
+  const { client, project, year } = splitTitle(item.title);
+  const meta = [item.roleLabel, year].filter(Boolean).join(" · ");
+  const flip = index % 2 === 1;
+
   return (
-    <article className="flex flex-col gap-4">
-      <div>
-        <h3 className="font-display text-xl text-foreground">{item.title}</h3>
-        {item.roleLabel && (
-          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted">
-            {item.roleLabel}
+    <article
+      id={item.id}
+      className="grid scroll-mt-28 items-center gap-8 md:grid-cols-12 md:gap-14"
+    >
+      <Reveal className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}>
+        <Media item={item} index={index} client={client} project={project} />
+      </Reveal>
+      <Reveal delay={0.12} className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
+        <span className="font-display text-6xl leading-none text-foreground/15 md:text-7xl">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        {client && <p className="label-caps mt-6 text-muted">{client}</p>}
+        <h2 className="mt-3 font-display text-h2 text-foreground">{project}</h2>
+        {meta && (
+          <p className="mt-3 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-foreground/70">
+            {meta}
           </p>
         )}
-      </div>
-      <p className="max-w-2xl text-sm leading-relaxed text-foreground/80">
-        {item.description}
-      </p>
-      <Media item={item} />
+        <div className="mt-6 space-y-4 font-display text-lg leading-relaxed text-foreground/80">
+          {paragraphs(item.description).map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
+        </div>
+      </Reveal>
     </article>
   );
 }
