@@ -139,6 +139,7 @@ model GalleryItem {
   mediaUrl      String? // embed URL or article link
   streamVideoId String? // Cloudflare Stream video UID, set when mediaType = VIDEO_UPLOAD
   thumbnailUrl  String? // auto-filled from Stream's generated thumbnail when uploaded
+  aspectRatio   Float? // video width / height from Stream (e.g. 1.78, 0.5625); null if unknown
   order         Int       @default(0)
   published     Boolean   @default(true)
   featured      Boolean   @default(false) // shown in the homepage "Selected work" block

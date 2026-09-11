@@ -13,6 +13,7 @@ export type GalleryItemInput = {
   mediaUrl: string;
   streamVideoId?: string;
   thumbnailUrl?: string;
+  aspectRatio?: number | null;
   published: boolean;
   featured: boolean;
 };
@@ -47,6 +48,7 @@ export async function createGalleryItem(
       mediaUrl: data.mediaUrl || null,
       streamVideoId: data.streamVideoId || null,
       thumbnailUrl: data.thumbnailUrl || null,
+      aspectRatio: data.aspectRatio ?? null,
       published: data.published,
       featured: data.featured,
       order: (maxOrder._max.order ?? 0) + 1,
@@ -73,6 +75,7 @@ export async function updateGalleryItem(
       mediaUrl: data.mediaUrl || null,
       streamVideoId: data.streamVideoId || null,
       thumbnailUrl: data.thumbnailUrl || null,
+      aspectRatio: data.aspectRatio ?? null,
       published: data.published,
       featured: data.featured,
     },

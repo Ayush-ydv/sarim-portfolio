@@ -28,6 +28,8 @@ export type StreamVideoStatus = {
   readyToStream: boolean;
   thumbnail: string | null;
   iframeUrl: string | null;
+  width: number | null;
+  height: number | null;
 };
 
 export async function getStreamVideoStatus(uid: string): Promise<StreamVideoStatus> {
@@ -45,5 +47,7 @@ export async function getStreamVideoStatus(uid: string): Promise<StreamVideoStat
     readyToStream: Boolean(data.result.readyToStream),
     thumbnail: data.result.thumbnail ?? null,
     iframeUrl: preview ? preview.replace(/\/watch$/, "/iframe") : null,
+    width: data.result.input?.width ?? null,
+    height: data.result.input?.height ?? null,
   };
 }

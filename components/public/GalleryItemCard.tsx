@@ -1,7 +1,13 @@
 import type { GalleryItem } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";
 import VideoPlayer from "@/components/public/VideoPlayer";
-import { paragraphs, splitTitle, toEmbedUrl, videoThumbnail } from "@/lib/media";
+import {
+  isVertical,
+  paragraphs,
+  splitTitle,
+  toEmbedUrl,
+  videoThumbnail,
+} from "@/lib/media";
 
 const tints = ["bg-lavender", "bg-mint", "bg-blush", "bg-sun"];
 
@@ -95,7 +101,9 @@ export function GalleryMedia({
   );
 }
 
-// Landscape layout: media and text in alternating wide rows.
+// Landscape layout: media and text in alternating wide rows. A vertical
+// video in a landscape category keeps its 9:16 frame, narrowed and centered
+// so it doesn't tower over the text beside it.
 export default function GalleryItemCard({
   item,
   index,
@@ -106,6 +114,7 @@ export default function GalleryItemCard({
   const { client, project, year } = splitTitle(item.title);
   const meta = [item.roleLabel, year].filter(Boolean).join(" · ");
   const flip = index % 2 === 1;
+  const vertical = isVertical(item, "LANDSCAPE");
 
   return (
     <article
@@ -113,7 +122,15 @@ export default function GalleryItemCard({
       className="grid scroll-mt-28 items-center gap-8 md:grid-cols-12 md:gap-14"
     >
       <Reveal className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}>
-        <GalleryMedia item={item} index={index} client={client} project={project} />
+        <div className={vertical ? "mx-auto w-full max-w-[20rem] md:max-w-[22rem]" : undefined}>
+          <GalleryMedia
+            item={item}
+            index={index}
+            client={client}
+            project={project}
+            vertical={vertical}
+          />
+        </div>
       </Reveal>
       <Reveal delay={0.12} className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
         <span className="font-display text-6xl leading-none text-foreground/15 md:text-7xl">

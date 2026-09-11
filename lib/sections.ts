@@ -51,10 +51,11 @@ export const getWorkCategories = cache(() =>
   }),
 );
 
-const FEATURED_LIMIT = 6;
+const FEATURED_LIMIT = 9;
 
-// Homepage "Selected work": projects flagged "Show on homepage", across all
-// categories. Until any are flagged, the first project of each category.
+// Homepage "Recent cuts" collage: projects flagged "Show on homepage", across
+// all categories. Until any are flagged, the first project of each category.
+// The category's layout tells the collage which tiles are tall reels.
 export const getFeaturedWork = cache(async () => {
   const featured = await prisma.galleryItem.findMany({
     where: {
@@ -64,7 +65,9 @@ export const getFeaturedWork = cache(async () => {
     },
     orderBy: [{ section: { order: "asc" } }, { order: "asc" }],
     take: FEATURED_LIMIT,
-    include: { section: { select: { slug: true, navLabel: true } } },
+    include: {
+      section: { select: { slug: true, navLabel: true, galleryLayout: true } },
+    },
   });
   if (featured.length > 0) return featured;
 
@@ -73,7 +76,11 @@ export const getFeaturedWork = cache(async () => {
     .flatMap((category) =>
       category.galleryItems.map((item) => ({
         ...item,
-        section: { slug: category.slug, navLabel: category.navLabel },
+        section: {
+          slug: category.slug,
+          navLabel: category.navLabel,
+          galleryLayout: category.galleryLayout,
+        },
       })),
     )
     .slice(0, FEATURED_LIMIT);

@@ -64,7 +64,7 @@ export default async function AdminHomePage() {
 
       <SectionHeading
         title="Selected work"
-        description="Tick “Show on homepage” on any project under Sections → your Work categories. Until you tick some, the first project of each category is shown."
+        description="An autoplaying collage mixing tall reels and wide films. Tick “Show on homepage” on up to 9 projects under Sections → your Work categories; each clip loops from its poster frame. Until you tick some, the first project of each category is shown."
         hidden={isHidden("work")}
       />
 

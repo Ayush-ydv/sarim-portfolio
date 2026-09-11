@@ -10,7 +10,8 @@ export const HOME_BLOCKS = [
   {
     key: "work",
     label: "Selected work",
-    description: "Projects marked “Show on homepage”, plus a More button to the Work page.",
+    description:
+      "An autoplaying collage of projects marked “Show on homepage”, plus a More button to the Work page.",
   },
   {
     key: "summary",

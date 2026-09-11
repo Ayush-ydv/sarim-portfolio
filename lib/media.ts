@@ -89,6 +89,37 @@ export function videoPosterUrl(url: string) {
     .replace(FILE_EXTENSION, ".jpg");
 }
 
+const STREAM_HOST = /https:\/\/(customer-[a-z0-9]+\.cloudflarestream\.com)\//;
+
+// HLS manifest for an uploaded Stream video. The account's customer host is
+// read from the embed or poster URL already stored on the item.
+export function streamHlsUrl(item: {
+  streamVideoId: string | null;
+  mediaUrl: string | null;
+  thumbnailUrl: string | null;
+}) {
+  if (!item.streamVideoId) return null;
+  const host =
+    item.mediaUrl?.match(STREAM_HOST)?.[1] ?? item.thumbnailUrl?.match(STREAM_HOST)?.[1];
+  return host ? `https://${host}/${item.streamVideoId}/manifest/video.m3u8` : null;
+}
+
+// Posters are Stream thumbnails taken at ?time=Ns; that moment is also where
+// a homepage loop starts, so the clip opens on the frame chosen as the poster.
+export function thumbnailTime(url: string | null | undefined) {
+  const match = url?.match(/[?&]time=(\d+(?:\.\d+)?)s/);
+  return match ? Number(match[1]) : 0;
+}
+
+// Tall or wide: the video's own proportions when known (stored on upload),
+// otherwise the category's layout — so a vertical film in Films still shows tall.
+export function isVertical(
+  item: { aspectRatio: number | null },
+  layout: "LANDSCAPE" | "VERTICAL",
+) {
+  return item.aspectRatio != null ? item.aspectRatio < 1 : layout === "VERTICAL";
+}
+
 export type BackgroundEmbed = {
   kind: "youtube" | "vimeo";
   embedUrl: string;

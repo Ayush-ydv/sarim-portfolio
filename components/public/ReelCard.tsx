@@ -1,8 +1,9 @@
 import type { GalleryItem } from "@prisma/client";
 import { GalleryMedia } from "@/components/public/GalleryItemCard";
-import { splitTitle } from "@/lib/media";
+import { isVertical, splitTitle } from "@/lib/media";
 
-// Vertical layout: a 9:16 tile with a compact caption, for reels.
+// Vertical layout: a 9:16 tile with a compact caption, for reels. A wide
+// video dropped into a reels category keeps its 16:9 frame.
 export default function ReelCard({
   item,
   index,
@@ -20,7 +21,7 @@ export default function ReelCard({
         index={index}
         client={client}
         project={project}
-        vertical
+        vertical={isVertical(item, "VERTICAL")}
       />
       {client && <p className="label-caps mt-5 text-muted">{client}</p>}
       <h2 className="mt-2 font-display text-xl leading-tight text-foreground">

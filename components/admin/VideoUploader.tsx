@@ -4,6 +4,13 @@ import { useRef, useState } from "react";
 
 type UploadState = "idle" | "uploading" | "processing" | "ready" | "error";
 
+export type UploadedVideo = {
+  streamVideoId: string;
+  mediaUrl: string;
+  thumbnailUrl: string;
+  aspectRatio: number | null;
+};
+
 export default function VideoUploader({
   streamVideoId,
   thumbnailUrl,
@@ -11,7 +18,7 @@ export default function VideoUploader({
 }: {
   streamVideoId?: string;
   thumbnailUrl?: string;
-  onUploaded: (data: { streamVideoId: string; mediaUrl: string; thumbnailUrl: string }) => void;
+  onUploaded: (data: UploadedVideo) => void;
 }) {
   const [status, setStatus] = useState<UploadState>(streamVideoId ? "ready" : "idle");
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +35,8 @@ export default function VideoUploader({
           streamVideoId: uid,
           mediaUrl: data.iframeUrl,
           thumbnailUrl: data.thumbnail ?? "",
+          // Lets the site lay the video out tall or wide, whatever category it's in.
+          aspectRatio: data.width && data.height ? data.width / data.height : null,
         });
         setStatus("ready");
         return;

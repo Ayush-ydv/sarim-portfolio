@@ -31,6 +31,7 @@ export default function GalleryItemForm({
   const [mediaUrl, setMediaUrl] = useState(item?.mediaUrl ?? "");
   const [streamVideoId, setStreamVideoId] = useState(item?.streamVideoId ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState(item?.thumbnailUrl ?? "");
+  const [aspectRatio, setAspectRatio] = useState<number | null>(item?.aspectRatio ?? null);
   const [published, setPublished] = useState(item?.published ?? true);
   const [featured, setFeatured] = useState(item?.featured ?? false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export default function GalleryItemForm({
               mediaUrl,
               streamVideoId,
               thumbnailUrl,
+              aspectRatio,
               published,
               featured,
             });
@@ -102,9 +104,12 @@ export default function GalleryItemForm({
           </label>
           <select
             value={mediaType}
-            onChange={(e) =>
-              setMediaType(e.target.value as GalleryItemInput["mediaType"])
-            }
+            onChange={(e) => {
+              const next = e.target.value as GalleryItemInput["mediaType"];
+              setMediaType(next);
+              // Proportions come from an uploaded video; drop them for other media.
+              if (next !== "VIDEO_UPLOAD") setAspectRatio(null);
+            }}
             className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
           >
             {mediaTypeOptions.map((option) => (
@@ -147,6 +152,7 @@ export default function GalleryItemForm({
             setStreamVideoId(data.streamVideoId);
             setMediaUrl(data.mediaUrl);
             setThumbnailUrl(data.thumbnailUrl);
+            setAspectRatio(data.aspectRatio);
           }}
         />
       )}
