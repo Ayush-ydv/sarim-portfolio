@@ -57,7 +57,7 @@ export default async function AdminHomePage() {
 
       <SectionHeading
         title="Brands"
-        description="Scroll left to right under the intro. Upload a logo (a transparent PNG or SVG works best), or leave it empty to show the name in type."
+        description="Scroll continuously to the left under the intro. Upload a logo (a transparent PNG or SVG works best), or leave it empty to show the name in type."
         hidden={isHidden("brands")}
       />
       <BrandsEditor brands={settings.brands} />

@@ -5,7 +5,7 @@ export const HOME_BLOCKS = [
   {
     key: "brands",
     label: "Brands marquee",
-    description: "Logos of brands you've worked with, scrolling left to right.",
+    description: "Logos of brands you've worked with, scrolling continuously to the left.",
   },
   {
     key: "work",

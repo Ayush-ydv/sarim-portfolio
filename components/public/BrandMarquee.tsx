@@ -1,10 +1,9 @@
 import type { Brand } from "@prisma/client";
 import SmartImage from "@/components/SmartImage";
 
-// CSS-driven, no JS. Two identical copies slide by half their combined width
-// for a seamless loop; `reverse` runs the shared keyframes backwards so the
-// strip moves left to right. Each copy repeats the brands enough to be wider
-// than any viewport.
+// CSS-driven, no JS. Two identical copies slide left by half their combined
+// width for a seamless loop, so the strip keeps moving to the left. Each copy
+// repeats the brands enough to be wider than any viewport.
 export default function BrandMarquee({ brands }: { brands: Brand[] }) {
   if (brands.length === 0) return null;
   const repeated = Array.from(
@@ -29,7 +28,7 @@ export default function BrandMarquee({ brands }: { brands: Brand[] }) {
         aria-hidden
         className="group mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
-        <div className="flex w-max animate-marquee [animation-direction:reverse] group-hover:[animation-play-state:paused]">
+        <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
           {[0, 1].map((copy) => (
             <ul key={copy} className="flex shrink-0 items-center">
               {repeated.map((brand, index) => (
