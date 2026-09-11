@@ -32,6 +32,7 @@ export default function GalleryItemForm({
   const [streamVideoId, setStreamVideoId] = useState(item?.streamVideoId ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState(item?.thumbnailUrl ?? "");
   const [published, setPublished] = useState(item?.published ?? true);
+  const [featured, setFeatured] = useState(item?.featured ?? false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -51,6 +52,7 @@ export default function GalleryItemForm({
               streamVideoId,
               thumbnailUrl,
               published,
+              featured,
             });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
@@ -78,7 +80,7 @@ export default function GalleryItemForm({
         <input
           value={roleLabel}
           onChange={(e) => setRoleLabel(e.target.value)}
-          placeholder="e.g. Narration voiceover"
+          placeholder="e.g. Lead Editor"
           className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
         />
       </div>
@@ -148,14 +150,24 @@ export default function GalleryItemForm({
           }}
         />
       )}
-      <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted">
-        <input
-          type="checkbox"
-          checked={published}
-          onChange={(e) => setPublished(e.target.checked)}
-        />
-        Published
-      </label>
+      <div className="flex flex-wrap gap-6">
+        <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted">
+          <input
+            type="checkbox"
+            checked={published}
+            onChange={(e) => setPublished(e.target.checked)}
+          />
+          Published
+        </label>
+        <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+          Show on homepage
+        </label>
+      </div>
       {error && <p className="text-sm text-red-700">{error}</p>}
       <div className="flex gap-3">
         <button

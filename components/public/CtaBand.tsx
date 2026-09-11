@@ -13,7 +13,7 @@ export default function CtaBand({
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="scroll-mt-24 px-3 pb-3 md:px-6 md:pb-6"
+      className="scroll-mt-24 p-3 md:p-6"
     >
       <div className="wash-mint relative overflow-hidden rounded-[2rem] px-6 py-24 text-center md:py-36">
         <Reveal>

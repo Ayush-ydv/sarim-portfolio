@@ -76,7 +76,9 @@ function SortableItemRow({
       <div className="flex-1">
         <p className="text-sm text-foreground">{item.title}</p>
         <p className="text-xs text-muted">
-          {item.mediaType} {!item.published && "· Unpublished"}
+          {item.mediaType}
+          {!item.published && " · Unpublished"}
+          {item.featured && " · ★ On homepage"}
         </p>
       </div>
       <button

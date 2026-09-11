@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSectionBySlug } from "@/lib/sections";
+import { getSectionBySlug, getWorkCategories } from "@/lib/sections";
 import GalleryTemplate from "@/components/public/GalleryTemplate";
 import ContentTemplate from "@/components/public/ContentTemplate";
 import ResumeTemplate from "@/components/public/ResumeTemplate";
@@ -29,8 +29,15 @@ export default async function SectionPage({
   }
 
   switch (section.type) {
-    case "GALLERY":
-      return <GalleryTemplate section={section} />;
+    case "GALLERY": {
+      const categories = await getWorkCategories();
+      return (
+        <GalleryTemplate
+          section={section}
+          categories={categories.map(({ slug, navLabel }) => ({ slug, navLabel }))}
+        />
+      );
+    }
     case "CONTENT":
       return <ContentTemplate section={section} />;
     case "RESUME":

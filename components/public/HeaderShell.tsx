@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-
-type NavLink = { href: string; label: string };
+import type { NavLink } from "@/lib/nav";
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -43,6 +42,8 @@ export default function HeaderShell({
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
+  const isActive = (link: NavLink) => link.match.includes(pathname);
+  const mobileLinks: NavLink[] = [{ href: "/", label: "Home", match: ["/"] }, ...links];
 
   // While the menu is open the header sits transparently on top of the
   // overlay so the name and close button stay visible.
@@ -69,7 +70,7 @@ export default function HeaderShell({
           <nav aria-label="Primary" className="hidden md:block">
             <ul className="flex items-center gap-8">
               {links.map((link) => {
-                const active = pathname === link.href;
+                const active = isActive(link);
                 return (
                   <li key={link.href} className="relative">
                     <Link
@@ -146,7 +147,7 @@ export default function HeaderShell({
           >
             <nav aria-label="Mobile">
               <ul className="flex flex-col gap-2">
-                {[{ href: "/", label: "Home" }, ...links].map((link, index) => (
+                {mobileLinks.map((link, index) => (
                   <motion.li
                     key={link.href}
                     initial={{ opacity: 0, y: 24 }}
@@ -156,7 +157,7 @@ export default function HeaderShell({
                     <Link
                       href={link.href}
                       onClick={closeMenu}
-                      aria-current={pathname === link.href ? "page" : undefined}
+                      aria-current={isActive(link) ? "page" : undefined}
                       className="block font-display text-5xl leading-tight text-foreground"
                     >
                       {link.label}

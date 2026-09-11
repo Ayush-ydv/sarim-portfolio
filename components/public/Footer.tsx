@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSiteSettings, getVisibleSections } from "@/lib/sections";
+import { buildNavLinks } from "@/lib/nav";
 
 function FooterColumn({
   title,
@@ -50,10 +51,10 @@ export default async function Footer() {
                 Home
               </Link>
             </li>
-            {sections.map((section) => (
-              <li key={section.id}>
-                <Link href={`/${section.slug}`} className="link-sweep">
-                  {section.navLabel}
+            {buildNavLinks(sections).map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="link-sweep">
+                  {link.label}
                 </Link>
               </li>
             ))}

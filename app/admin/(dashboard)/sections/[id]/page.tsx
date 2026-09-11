@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import ContentEditor from "@/components/admin/ContentEditor";
 import GalleryEditor from "@/components/admin/GalleryEditor";
 import ResumeEditor from "@/components/admin/ResumeEditor";
+import CategorySettingsForm from "@/components/admin/CategorySettingsForm";
 
 export default async function SectionEditorPage({
   params,
@@ -43,7 +44,21 @@ export default async function SectionEditorPage({
       )}
 
       {section.type === "GALLERY" && (
-        <GalleryEditor sectionId={section.id} items={section.galleryItems} />
+        <>
+          <CategorySettingsForm
+            sectionId={section.id}
+            summary={section.summary ?? ""}
+            coverUrl={section.coverUrl ?? ""}
+            galleryLayout={section.galleryLayout}
+          />
+          <div className="mt-4">
+            <h2 className="font-display text-xl text-foreground">Projects</h2>
+            <p className="mt-1 text-sm text-muted">
+              Tick “Show on homepage” on a project to feature it in Selected work.
+            </p>
+          </div>
+          <GalleryEditor sectionId={section.id} items={section.galleryItems} />
+        </>
       )}
 
       {section.type === "RESUME" &&

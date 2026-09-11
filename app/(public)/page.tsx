@@ -1,23 +1,61 @@
-import { getFeaturedWork, getSiteSettings } from "@/lib/sections";
-import SmartMedia from "@/components/SmartMedia";
-import Reveal from "@/components/motion/Reveal";
+import { Fragment } from "react";
+import {
+  getFeaturedWork,
+  getSiteSettings,
+  getWorkCategories,
+} from "@/lib/sections";
+import { cleanHomeBlocks, type HomeBlockKey } from "@/lib/homeBlocks";
 import Hero from "@/components/public/Hero";
-import Marquee from "@/components/public/Marquee";
+import BrandMarquee from "@/components/public/BrandMarquee";
 import FeaturedWork from "@/components/public/FeaturedWork";
+import Summary from "@/components/public/Summary";
 import QuickLinksGrid from "@/components/public/QuickLinksGrid";
 import StatsBand from "@/components/public/StatsBand";
+import Philosophy from "@/components/public/Philosophy";
 import ServicesGrid from "@/components/public/ServicesGrid";
 import CtaBand from "@/components/public/CtaBand";
 
+// The hero is always first and the contact band always last; everything in
+// between is chosen and ordered in admin via SiteSettings.homeBlocks.
 export default async function HomePage() {
-  const [settings, featured] = await Promise.all([
+  const [settings, featured, categories] = await Promise.all([
     getSiteSettings(),
     getFeaturedWork(),
+    getWorkCategories(),
   ]);
   const name = [settings.heroNameLine1, settings.heroNameLine2]
     .filter(Boolean)
     .join(" ");
-  const workHref = featured ? `/${featured.slug}` : "#about";
+
+  function renderBlock(key: HomeBlockKey) {
+    switch (key) {
+      case "brands":
+        return <BrandMarquee brands={settings.brands} />;
+      case "work":
+        return <FeaturedWork items={featured} />;
+      case "summary":
+        return (
+          <Summary
+            name={name}
+            bioText={settings.bioText}
+            bioImageUrl={settings.bioImageUrl}
+          />
+        );
+      case "quickLinks":
+        return <QuickLinksGrid links={settings.quickLinks} />;
+      case "stats":
+        return <StatsBand stats={settings.stats} />;
+      case "philosophy":
+        return <Philosophy text={settings.philosophyText} />;
+      case "services":
+        return (
+          <ServicesGrid
+            heading={settings.servicesHeading}
+            services={settings.services}
+          />
+        );
+    }
+  }
 
   return (
     <>
@@ -26,59 +64,15 @@ export default async function HomePage() {
         nameLine2={settings.heroNameLine2}
         tagline={settings.heroTagline}
         imageUrl={settings.heroImageUrl}
-        workHref={workHref}
+        workHref={categories.length > 0 ? "/work" : "#contact"}
         ctaLabel={settings.ctaButtonLabel}
       />
 
-      <Marquee items={settings.services.map((service) => service.title)} />
-
-      <section id="about" className="mx-auto max-w-6xl scroll-mt-24 px-6 pt-24 md:pt-32">
-        <Reveal className="grid gap-8 border-y border-foreground py-10 md:grid-cols-12 md:gap-12 md:py-14">
-          <div className="md:col-span-3">
-            <p className="label-caps text-muted">Summary</p>
-            {settings.bioImageUrl && (
-              <div className="relative mt-6 aspect-[4/5] overflow-hidden rounded-xl">
-                <SmartMedia
-                  src={settings.bioImageUrl}
-                  alt={name}
-                  sizes="(min-width: 768px) 20vw, 90vw"
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </div>
-          <p className="whitespace-pre-line font-display text-lede text-foreground md:col-span-9">
-            {settings.bioText}
-          </p>
-        </Reveal>
-      </section>
-
-      {featured && (
-        <FeaturedWork href={`/${featured.slug}`} items={featured.galleryItems} />
-      )}
-
-      <QuickLinksGrid links={settings.quickLinks} />
-
-      <StatsBand stats={settings.stats} />
-
-      <section className="px-3 py-24 md:px-6 md:py-32">
-        <div className="wash-blush overflow-hidden rounded-[2rem]">
-          <Reveal className="mx-auto max-w-5xl px-6 py-20 md:px-12 md:py-28">
-            <p className="label-caps text-foreground/60">Philosophy</p>
-            <span
-              aria-hidden
-              className="mt-6 block font-display text-[7rem] leading-[0.6] text-foreground/20"
-            >
-              &ldquo;
-            </span>
-            <blockquote className="font-display text-quote text-balance text-foreground">
-              {settings.philosophyText}
-            </blockquote>
-          </Reveal>
-        </div>
-      </section>
-
-      <ServicesGrid heading={settings.servicesHeading} services={settings.services} />
+      <div id="explore" className="scroll-mt-20">
+        {cleanHomeBlocks(settings.homeBlocks).map((key) => (
+          <Fragment key={key}>{renderBlock(key)}</Fragment>
+        ))}
+      </div>
 
       <CtaBand
         text={settings.ctaText}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { cleanHomeBlocks } from "@/lib/homeBlocks";
 
 function revalidateSite() {
   revalidatePath("/", "layout");
@@ -37,6 +38,16 @@ export async function updateHomeContent(data: HomeContentInput) {
       ctaButtonLabel: data.ctaButtonLabel.trim() || "Book Me",
       servicesHeading: data.servicesHeading.trim() || "What I do",
     },
+  });
+  revalidateSite();
+}
+
+// Enabled homepage blocks, in display order.
+export async function updateHomeBlocks(keys: string[]) {
+  await requireAdmin();
+  await prisma.siteSettings.update({
+    where: { id: "singleton" },
+    data: { homeBlocks: cleanHomeBlocks(keys) },
   });
   revalidateSite();
 }
@@ -165,6 +176,45 @@ export async function reorderServices(orderedIds: string[]) {
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.service.update({ where: { id }, data: { order: index + 1 } }),
+    ),
+  );
+  revalidateSite();
+}
+
+export async function createBrand(name: string, logoUrl: string) {
+  await requireAdmin();
+  const maxOrder = await prisma.brand.aggregate({ _max: { order: true } });
+  await prisma.brand.create({
+    data: {
+      name,
+      logoUrl: logoUrl || null,
+      order: (maxOrder._max.order ?? 0) + 1,
+    },
+  });
+  revalidateSite();
+}
+
+export async function updateBrand(id: string, name: string, logoUrl: string) {
+  await requireAdmin();
+  if (!name.trim()) throw new Error("Brand name is required");
+  await prisma.brand.update({
+    where: { id },
+    data: { name: name.trim(), logoUrl: logoUrl.trim() || null },
+  });
+  revalidateSite();
+}
+
+export async function deleteBrand(id: string) {
+  await requireAdmin();
+  await prisma.brand.delete({ where: { id } });
+  revalidateSite();
+}
+
+export async function reorderBrands(orderedIds: string[]) {
+  await requireAdmin();
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.brand.update({ where: { id }, data: { order: index + 1 } }),
     ),
   );
   revalidateSite();

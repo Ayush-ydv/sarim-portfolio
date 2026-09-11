@@ -5,18 +5,26 @@ import { paragraphs, splitTitle, toEmbedUrl, videoThumbnail } from "@/lib/media"
 
 const tints = ["bg-lavender", "bg-mint", "bg-blush", "bg-sun"];
 
-function Media({
+// A project's media at a fixed frame: 16:9 for films, 9:16 for reels.
+export function GalleryMedia({
   item,
   index,
   client,
   project,
+  vertical = false,
 }: {
   item: GalleryItem;
   index: number;
   client: string | null;
   project: string;
+  vertical?: boolean;
 }) {
   const tint = tints[index % tints.length];
+  const aspect = vertical ? "aspect-[9/16]" : "aspect-video";
+  const titleSize = vertical
+    ? "text-[clamp(1.5rem,3vw,2.25rem)]"
+    : "text-[clamp(2rem,4.5vw,3.75rem)]";
+  const padding = vertical ? "p-6" : "p-8 md:p-10";
 
   if (
     (item.mediaType === "EMBED" || item.mediaType === "VIDEO_UPLOAD") &&
@@ -27,6 +35,7 @@ function Media({
         embedUrl={toEmbedUrl(item.mediaUrl)}
         thumbnail={videoThumbnail(item)}
         title={item.title}
+        vertical={vertical}
       />
     );
   }
@@ -34,9 +43,9 @@ function Media({
   if (item.mediaType === "AUDIO" && item.mediaUrl) {
     return (
       <div
-        className={`flex aspect-video w-full flex-col justify-end gap-6 rounded-2xl p-8 ${tint}`}
+        className={`flex ${aspect} w-full flex-col justify-end gap-6 rounded-2xl ${padding} ${tint}`}
       >
-        <span className="font-display text-4xl italic leading-tight text-foreground">
+        <span className={`font-display ${titleSize} italic leading-tight text-foreground`}>
           {project}
         </span>
         <audio src={item.mediaUrl} controls className="w-full" />
@@ -50,10 +59,10 @@ function Media({
         href={item.mediaUrl}
         target="_blank"
         rel="noreferrer"
-        className={`group flex aspect-video w-full flex-col justify-between rounded-2xl p-8 md:p-10 ${tint}`}
+        className={`group flex ${aspect} w-full flex-col justify-between rounded-2xl ${padding} ${tint}`}
       >
         <span className="label-caps text-foreground/70">Article</span>
-        <span className="font-display text-[clamp(2rem,4.5vw,3.75rem)] italic leading-[1.02] text-foreground">
+        <span className={`font-display ${titleSize} italic leading-[1.02] text-foreground`}>
           {project}
         </span>
         <span className="link-sweep self-start text-[0.72rem] font-medium uppercase tracking-[0.2em] text-foreground">
@@ -65,7 +74,9 @@ function Media({
 
   if (item.mediaType === "VIDEO_UPLOAD" && item.streamVideoId) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-foreground/5">
+      <div
+        className={`flex ${aspect} w-full items-center justify-center rounded-2xl bg-foreground/5`}
+      >
         <span className="label-caps text-muted">Video processing</span>
       </div>
     );
@@ -74,16 +85,17 @@ function Media({
   // No media yet: a film-style title card keeps the layout intentional.
   return (
     <div
-      className={`flex aspect-video w-full flex-col justify-between rounded-2xl p-8 md:p-10 ${tint}`}
+      className={`flex ${aspect} w-full flex-col justify-between rounded-2xl ${padding} ${tint}`}
     >
       <span className="label-caps text-foreground/60">{client ?? "Project"}</span>
-      <span className="font-display text-[clamp(2rem,4.5vw,3.75rem)] italic leading-[1.02] text-foreground">
+      <span className={`font-display ${titleSize} italic leading-[1.02] text-foreground`}>
         {project}
       </span>
     </div>
   );
 }
 
+// Landscape layout: media and text in alternating wide rows.
 export default function GalleryItemCard({
   item,
   index,
@@ -101,7 +113,7 @@ export default function GalleryItemCard({
       className="grid scroll-mt-28 items-center gap-8 md:grid-cols-12 md:gap-14"
     >
       <Reveal className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}>
-        <Media item={item} index={index} client={client} project={project} />
+        <GalleryMedia item={item} index={index} client={client} project={project} />
       </Reveal>
       <Reveal delay={0.12} className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
         <span className="font-display text-6xl leading-none text-foreground/15 md:text-7xl">

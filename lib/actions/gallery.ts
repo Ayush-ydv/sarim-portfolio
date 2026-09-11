@@ -14,6 +14,7 @@ export type GalleryItemInput = {
   streamVideoId?: string;
   thumbnailUrl?: string;
   published: boolean;
+  featured: boolean;
 };
 
 async function revalidateSection(sectionId: string) {
@@ -47,6 +48,7 @@ export async function createGalleryItem(
       streamVideoId: data.streamVideoId || null,
       thumbnailUrl: data.thumbnailUrl || null,
       published: data.published,
+      featured: data.featured,
       order: (maxOrder._max.order ?? 0) + 1,
     },
   });
@@ -72,6 +74,7 @@ export async function updateGalleryItem(
       streamVideoId: data.streamVideoId || null,
       thumbnailUrl: data.thumbnailUrl || null,
       published: data.published,
+      featured: data.featured,
     },
   });
 

@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-import { SectionType } from "@prisma/client";
+import { SectionType, type GalleryLayout } from "@prisma/client";
+
+// Static routes that would shadow a section with the same slug.
+const RESERVED_SLUGS = new Set(["work", "admin", "api"]);
 
 function slugify(input: string) {
   return input
@@ -17,7 +20,10 @@ async function uniqueSlug(base: string) {
   const slugBase = slugify(base) || "section";
   let slug = slugBase;
   let suffix = 2;
-  while (await prisma.section.findUnique({ where: { slug } })) {
+  while (
+    RESERVED_SLUGS.has(slug) ||
+    (await prisma.section.findUnique({ where: { slug } }))
+  ) {
     slug = `${slugBase}-${suffix}`;
     suffix += 1;
   }
@@ -69,5 +75,22 @@ export async function reorderSections(orderedIds: string[]) {
       prisma.section.update({ where: { id }, data: { order: index + 1 } }),
     ),
   );
+  revalidatePath("/", "layout");
+}
+
+// How a gallery section appears as a category on /work and on its own page.
+export async function updateCategorySettings(
+  sectionId: string,
+  data: { summary: string; coverUrl: string; galleryLayout: GalleryLayout },
+) {
+  await requireAdmin();
+  await prisma.section.update({
+    where: { id: sectionId },
+    data: {
+      summary: data.summary.trim() || null,
+      coverUrl: data.coverUrl.trim() || null,
+      galleryLayout: data.galleryLayout,
+    },
+  });
   revalidatePath("/", "layout");
 }

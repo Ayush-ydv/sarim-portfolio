@@ -32,10 +32,14 @@ model SiteSettings {
   vimeoUrl       String?
   ctaButtonLabel  String  @default("Book Me")
   servicesHeading String  @default("What I do")
+  // Homepage blocks shown between the hero and the contact band, in display
+  // order; any block not listed is hidden. Keys live in lib/homeBlocks.ts.
+  homeBlocks      String[] @default(["brands", "work"])
 
   quickLinks QuickLink[]
   stats      Stat[]
   services   Service[]
+  brands     Brand[]
 }
 
 model QuickLink {
@@ -57,7 +61,7 @@ model Stat {
   order          Int          @default(0)
 }
 
-// "What I do" cards on the homepage; titles also feed the scrolling marquee
+// "What I do" cards on the homepage
 model Service {
   id             String       @id @default(cuid())
   siteSettingsId String       @default("singleton")
@@ -67,21 +71,41 @@ model Service {
   order          Int          @default(0)
 }
 
+// "Brands I've worked with" marquee; the name shows when there's no logo
+model Brand {
+  id             String       @id @default(cuid())
+  siteSettingsId String       @default("singleton")
+  siteSettings   SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  name           String
+  logoUrl        String?
+  order          Int          @default(0)
+}
+
 enum SectionType {
-  GALLERY // repeating work-item units (Editing portfolio, Voiceover portfolio, etc.)
+  GALLERY // repeating work items; every visible gallery is a category on /work
   CONTENT // freeform text + image (About, or any custom page)
   RESUME // structured CV entries + optional PDF
+}
+
+enum GalleryLayout {
+  LANDSCAPE // alternating wide rows (films)
+  VERTICAL // 9:16 grid (reels)
 }
 
 // The addable/removable/reorderable nav sections
 model Section {
   id        String      @id @default(cuid())
-  slug      String      @unique // e.g. "editing-portfolio" -> /editing-portfolio
-  navLabel  String // e.g. "Editing portfolio"
+  slug      String      @unique // e.g. "films" -> /films
+  navLabel  String // e.g. "Films"
   type      SectionType
   order     Int         @default(0)
   isVisible Boolean     @default(true) // hidden = stays in DB, drops off nav + route 404s
   createdAt DateTime    @default(now())
+
+  // Gallery-only: how the category appears on the /work hub and its page
+  summary       String? // one-liner on the /work card
+  coverUrl      String? // image, video, or YouTube/Vimeo link on the /work card
+  galleryLayout GalleryLayout @default(LANDSCAPE)
 
   content      SectionContent?
   galleryItems GalleryItem[]
@@ -117,6 +141,7 @@ model GalleryItem {
   thumbnailUrl  String? // auto-filled from Stream's generated thumbnail when uploaded
   order         Int       @default(0)
   published     Boolean   @default(true)
+  featured      Boolean   @default(false) // shown in the homepage "Selected work" block
 }
 
 model ResumeData {

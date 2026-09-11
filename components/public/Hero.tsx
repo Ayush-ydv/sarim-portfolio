@@ -79,7 +79,7 @@ export default function Hero({
           </div>
 
           <a
-            href="#about"
+            href="#explore"
             className="label-caps absolute bottom-8 left-6 hidden items-center gap-3 text-muted animate-rise md:left-12 md:flex lg:left-20"
             style={{ animationDelay: "900ms" }}
           >

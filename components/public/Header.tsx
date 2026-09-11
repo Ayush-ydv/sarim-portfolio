@@ -1,4 +1,5 @@
 import { getSiteSettings, getVisibleSections } from "@/lib/sections";
+import { buildNavLinks } from "@/lib/nav";
 import HeaderShell from "@/components/public/HeaderShell";
 
 export default async function Header() {
@@ -14,10 +15,7 @@ export default async function Header() {
     <HeaderShell
       name={name}
       ctaLabel={settings.ctaButtonLabel}
-      links={sections.map((section) => ({
-        href: `/${section.slug}`,
-        label: section.navLabel,
-      }))}
+      links={buildNavLinks(sections)}
     />
   );
 }

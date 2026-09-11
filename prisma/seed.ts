@@ -1,7 +1,128 @@
-import { PrismaClient, SectionType, MediaType } from "@prisma/client";
+import {
+  PrismaClient,
+  SectionType,
+  MediaType,
+  GalleryLayout,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+type SeedProject = {
+  title: string;
+  roleLabel: string;
+  description: string;
+  featured?: boolean;
+};
+
+// Placeholder draft content — the client replaces all of it in admin.
+const FILMS: SeedProject[] = [
+  {
+    title: "Northwind Outfitters // Fall Campaign Film // 2025",
+    roleLabel: "Lead Editor",
+    description:
+      "A 90-second brand film for Northwind's fall collection launch. Cut for pace and texture — matching the edit rhythm to a driving score while keeping the product moments clean and confident.",
+    featured: true,
+  },
+  {
+    title: "The Long Way Home // Documentary Short // 2024",
+    roleLabel: "Editor & Colorist",
+    description:
+      "A 12-minute character-driven documentary following a former long-haul trucker's cross-country return home. Structured the story from 40+ hours of interview and verite footage, and handled the full color grade.",
+  },
+  {
+    title: 'Nadia Ray // "Static" Music Video // 2024',
+    roleLabel: "Editor",
+    description:
+      "Performance-driven music video cut to hit every beat of the track. Intercut three performance takes and one narrative thread to build momentum toward the final chorus.",
+  },
+];
+
+const REELS: SeedProject[] = [
+  {
+    title: "Lumen Coffee // Morning Ritual Reel // 2025",
+    roleLabel: "Editor",
+    description:
+      "A 30-second vertical reel for Lumen's seasonal launch — fast cuts timed to the pour, built for sound-off viewing with on-screen type.",
+    featured: true,
+  },
+  {
+    title: "Atlas Motors // Road Trip Series // 2025",
+    roleLabel: "Editor & Motion",
+    description:
+      "A four-part vertical series for Instagram and TikTok. Hook in the first second, payoff by fifteen.",
+  },
+  {
+    title: "Kinfolk Records // Tour Diary // 2024",
+    roleLabel: "Editor",
+    description:
+      "Behind-the-scenes tour reels cut overnight between shows, turning phone footage into a consistent visual diary.",
+  },
+];
+
+const AI_FILMS: SeedProject[] = [
+  {
+    title: "Personal Project // Paper Cities // 2025",
+    roleLabel: "Director & Editor",
+    description:
+      "A two-minute short built from AI-generated stills and motion, edited to an original score. Generation made the images; the story lives in the cut.",
+    featured: true,
+  },
+  {
+    title: "Northwind Outfitters // Future Collection Teaser // 2025",
+    roleLabel: "Editor",
+    description:
+      "A concept teaser mixing live-action product shots with AI-generated environments, cut for a 20-second launch slot.",
+  },
+];
+
+const BRANDS = [
+  "Northwind Outfitters",
+  "Bright Field Studios",
+  "Lumen Coffee",
+  "Atlas Motors",
+  "Kinfolk Records",
+  "Nadia Ray",
+];
+
+// A gallery section is a Work category; create it with placeholder projects
+// unless it already exists.
+async function seedCategory(
+  slug: string,
+  navLabel: string,
+  order: number,
+  summary: string,
+  galleryLayout: GalleryLayout,
+  projects: SeedProject[],
+) {
+  const section = await prisma.section.upsert({
+    where: { slug },
+    update: {},
+    create: {
+      slug,
+      navLabel,
+      type: SectionType.GALLERY,
+      order,
+      isVisible: true,
+      summary,
+      galleryLayout,
+    },
+  });
+
+  if ((await prisma.galleryItem.count({ where: { sectionId: section.id } })) === 0) {
+    await prisma.galleryItem.createMany({
+      data: projects.map((project, index) => ({
+        sectionId: section.id,
+        title: project.title,
+        roleLabel: project.roleLabel,
+        description: project.description,
+        mediaType: MediaType.EMBED,
+        featured: project.featured ?? false,
+        order: index + 1,
+      })),
+    });
+  }
+}
 
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -72,54 +193,36 @@ async function main() {
     });
   }
 
-  const editing = await prisma.section.upsert({
-    where: { slug: "editing-portfolio" },
-    update: {},
-    create: {
-      slug: "editing-portfolio",
-      navLabel: "Editing portfolio",
-      type: SectionType.GALLERY,
-      order: 1,
-      isVisible: true,
-    },
-  });
-
-  const existingGalleryItems = await prisma.galleryItem.count({
-    where: { sectionId: editing.id },
-  });
-  if (existingGalleryItems === 0) {
-    await prisma.galleryItem.createMany({
-      data: [
-        {
-          sectionId: editing.id,
-          title: "Northwind Outfitters // Fall Campaign Film // 2025",
-          roleLabel: "Lead Editor",
-          description:
-            "A 90-second brand film for Northwind's fall collection launch. Cut for pace and texture — matching the edit rhythm to a driving score while keeping the product moments clean and confident.",
-          mediaType: MediaType.EMBED,
-          order: 1,
-        },
-        {
-          sectionId: editing.id,
-          title: "The Long Way Home // Documentary Short // 2024",
-          roleLabel: "Editor & Colorist",
-          description:
-            "A 12-minute character-driven documentary following a former long-haul trucker's cross-country return home. Structured the story from 40+ hours of interview and verite footage, and handled the full color grade.",
-          mediaType: MediaType.EMBED,
-          order: 2,
-        },
-        {
-          sectionId: editing.id,
-          title: 'Nadia Ray // "Static" Music Video // 2024',
-          roleLabel: "Editor",
-          description:
-            "Performance-driven music video cut to hit every beat of the track. Intercut three performance takes and one narrative thread to build momentum toward the final chorus.",
-          mediaType: MediaType.EMBED,
-          order: 3,
-        },
-      ],
+  if ((await prisma.brand.count()) === 0) {
+    await prisma.brand.createMany({
+      data: BRANDS.map((name, index) => ({ name, order: index + 1 })),
     });
   }
+
+  await seedCategory(
+    "films",
+    "Films",
+    1,
+    "Brand films, documentaries and music videos.",
+    GalleryLayout.LANDSCAPE,
+    FILMS,
+  );
+  await seedCategory(
+    "reels",
+    "Reels",
+    2,
+    "Short-form vertical edits built for social.",
+    GalleryLayout.VERTICAL,
+    REELS,
+  );
+  await seedCategory(
+    "ai-films",
+    "AI Films",
+    3,
+    "Films made with generative AI — edited like any other story.",
+    GalleryLayout.LANDSCAPE,
+    AI_FILMS,
+  );
 
   const resumeSection = await prisma.section.upsert({
     where: { slug: "resume" },
@@ -128,7 +231,7 @@ async function main() {
       slug: "resume",
       navLabel: "Resume",
       type: SectionType.RESUME,
-      order: 2,
+      order: 4,
       isVisible: true,
     },
   });
@@ -139,10 +242,7 @@ async function main() {
     create: { sectionId: resumeSection.id },
   });
 
-  const existingResumeEntries = await prisma.resumeEntry.count({
-    where: { resumeDataId: resumeData.id },
-  });
-  if (existingResumeEntries === 0) {
+  if ((await prisma.resumeEntry.count({ where: { resumeDataId: resumeData.id } })) === 0) {
     await prisma.resumeEntry.createMany({
       data: [
         {
@@ -177,7 +277,7 @@ async function main() {
       slug: "about",
       navLabel: "About",
       type: SectionType.CONTENT,
-      order: 3,
+      order: 5,
       isVisible: true,
     },
   });

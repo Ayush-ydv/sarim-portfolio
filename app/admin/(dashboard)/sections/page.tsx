@@ -14,6 +14,10 @@ export default async function ManageSectionsPage() {
         <p className="mt-1 text-sm text-muted">
           Add, remove, reorder, and toggle the pages in your site nav.
         </p>
+        <p className="mt-2 text-sm text-muted">
+          Work categories (Films, Reels, AI Films…) share one “Work” menu item
+          and appear as cards on the Work page, in the order set here.
+        </p>
       </div>
       <AddSectionForm />
       <SectionList sections={sections} />

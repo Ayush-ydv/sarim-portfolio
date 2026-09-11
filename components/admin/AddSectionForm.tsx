@@ -5,7 +5,7 @@ import { SectionType } from "@prisma/client";
 import { createSection } from "@/lib/actions/sections";
 
 const typeOptions: { value: SectionType; label: string }[] = [
-  { value: "GALLERY", label: "Gallery (repeating work items)" },
+  { value: "GALLERY", label: "Work category (Films, Reels…)" },
   { value: "CONTENT", label: "Content (freeform text + image)" },
   { value: "RESUME", label: "Resume (structured CV entries)" },
 ];

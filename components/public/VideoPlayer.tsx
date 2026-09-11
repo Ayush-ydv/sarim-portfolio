@@ -9,16 +9,19 @@ export default function VideoPlayer({
   embedUrl,
   thumbnail,
   title,
+  vertical = false,
 }: {
   embedUrl: string;
   thumbnail: string | null;
   title: string;
+  vertical?: boolean;
 }) {
   const [playing, setPlaying] = useState(false);
+  const aspect = vertical ? "aspect-[9/16]" : "aspect-video";
 
   if (playing) {
     return (
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-foreground">
+      <div className={`relative ${aspect} w-full overflow-hidden rounded-2xl bg-foreground`}>
         <iframe
           src={embedUrl}
           title={title}
@@ -35,14 +38,14 @@ export default function VideoPlayer({
       type="button"
       onClick={() => setPlaying(true)}
       aria-label={`Play video: ${title}`}
-      className="group relative block aspect-video w-full overflow-hidden rounded-2xl bg-foreground text-left"
+      className={`group relative block ${aspect} w-full overflow-hidden rounded-2xl bg-foreground text-left`}
     >
       {thumbnail ? (
         <Image
           src={thumbnail}
           alt=""
           fill
-          sizes="(min-width: 768px) 58vw, 100vw"
+          sizes={vertical ? "(min-width: 768px) 25vw, 50vw" : "(min-width: 768px) 58vw, 100vw"}
           className="object-cover opacity-90 transition duration-[1.2s] ease-out-expo group-hover:scale-[1.04] group-hover:opacity-100"
         />
       ) : (
@@ -54,9 +57,14 @@ export default function VideoPlayer({
       />
       <span
         aria-hidden
-        className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-lg transition-transform duration-500 ease-out-expo group-hover:scale-110 md:h-24 md:w-24"
+        className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-lg transition-transform duration-500 ease-out-expo group-hover:scale-110 ${
+          vertical ? "h-14 w-14" : "h-20 w-20 md:h-24 md:w-24"
+        }`}
       >
-        <svg viewBox="0 0 24 24" className="ml-1 h-7 w-7 fill-foreground">
+        <svg
+          viewBox="0 0 24 24"
+          className={`ml-1 fill-foreground ${vertical ? "h-5 w-5" : "h-7 w-7"}`}
+        >
           <path d="M8 5.5v13l11-6.5z" />
         </svg>
       </span>
