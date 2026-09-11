@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ParallaxImage from "@/components/motion/ParallaxImage";
+import ParallaxMedia from "@/components/motion/ParallaxMedia";
 
 // The entrance is CSS keyframes rather than Framer so the name (the likely
 // LCP element) animates on first paint instead of waiting for hydration.
@@ -101,7 +101,7 @@ export default function Hero({
               style={{ animationDelay: "150ms" }}
             >
               {imageUrl ? (
-                <ParallaxImage
+                <ParallaxMedia
                   src={imageUrl}
                   alt={fullName}
                   sizes="(min-width: 768px) 30vw, 64vw"

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "@/components/SmartImage";
 import { useRef } from "react";
 import {
   motion,
@@ -8,10 +7,11 @@ import {
   useScroll,
   useTransform,
 } from "motion/react";
+import SmartMedia from "@/components/SmartMedia";
 
-// The image is oversized by 9% top and bottom so a ±7% drift never exposes
+// The media is oversized by 9% top and bottom so a ±7% drift never exposes
 // the frame's edges. Percentages keep that true at any frame size.
-export default function ParallaxImage({
+export default function ParallaxMedia({
   src,
   alt,
   sizes,
@@ -38,10 +38,9 @@ export default function ParallaxImage({
         className="absolute inset-x-0 -inset-y-[9%]"
         style={reduceMotion ? undefined : { y }}
       >
-        <Image
+        <SmartMedia
           src={src}
           alt={alt}
-          fill
           sizes={sizes}
           preload={preload}
           className="object-cover"

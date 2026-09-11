@@ -52,11 +52,12 @@ export default function ContentEditor({
         />
       </div>
       <FileUploadField
-        label="Image"
+        label="Image or video"
         value={imageUrl}
         onChange={setImageUrl}
-        resourceType="image"
-        accept="image/*"
+        resourceType="auto"
+        accept="image/*,video/*"
+        hint="Videos play muted on a loop — short clips (10–20s) load fastest."
       />
       <div className="flex items-center gap-4">
         <button

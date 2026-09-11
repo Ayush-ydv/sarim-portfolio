@@ -5,6 +5,9 @@ import type { SiteSettings } from "@prisma/client";
 import { updateHomeContent, type HomeContentInput } from "@/lib/actions/settings";
 import FileUploadField from "@/components/admin/FileUploadField";
 
+const MEDIA_HINT =
+  "Image or video. Videos play muted on a loop — short clips (10–20s) load fastest.";
+
 function Field({
   label,
   value,
@@ -93,11 +96,12 @@ export default function HomeSettingsForm({
         onChange={(v) => set("heroTagline", v)}
       />
       <FileUploadField
-        label="Hero image"
+        label="Hero image or video"
         value={form.heroImageUrl}
         onChange={(v) => set("heroImageUrl", v)}
-        resourceType="image"
-        accept="image/*"
+        resourceType="auto"
+        accept="image/*,video/*"
+        hint={MEDIA_HINT}
       />
       <Field
         label="Bio text"
@@ -107,11 +111,12 @@ export default function HomeSettingsForm({
         rows={5}
       />
       <FileUploadField
-        label="Bio image"
+        label="Bio image or video"
         value={form.bioImageUrl}
         onChange={(v) => set("bioImageUrl", v)}
-        resourceType="image"
-        accept="image/*"
+        resourceType="auto"
+        accept="image/*,video/*"
+        hint={MEDIA_HINT}
       />
       <Field
         label="Philosophy text"

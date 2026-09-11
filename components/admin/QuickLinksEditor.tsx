@@ -55,21 +55,22 @@ function QuickLinkRow({ link }: { link: QuickLink }) {
       </button>
       <div className="flex flex-1 flex-col gap-1">
         <label className="text-xs uppercase tracking-[0.18em] text-muted">
-          Link URL
+          Link URL (optional)
         </label>
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
+          placeholder="Leave empty for a plain clip"
           className="border border-rule bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
         />
       </div>
       <div className="min-w-[220px] flex-1">
         <FileUploadField
-          label="Thumbnail"
+          label="Thumbnail (image or video)"
           value={thumbnailUrl}
           onChange={setThumbnailUrl}
-          resourceType="image"
-          accept="image/*"
+          resourceType="auto"
+          accept="image/*,video/*"
         />
       </div>
       <button

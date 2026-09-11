@@ -1,6 +1,6 @@
 import type { getSectionBySlug } from "@/lib/sections";
 import Reveal from "@/components/motion/Reveal";
-import ParallaxImage from "@/components/motion/ParallaxImage";
+import ParallaxMedia from "@/components/motion/ParallaxMedia";
 import { paragraphs } from "@/lib/media";
 
 type Section = NonNullable<Awaited<ReturnType<typeof getSectionBySlug>>>;
@@ -27,7 +27,7 @@ export default function ContentTemplate({ section }: { section: Section }) {
                 aria-hidden
                 className="absolute -bottom-4 -right-4 h-full w-full rounded-2xl bg-mint"
               />
-              <ParallaxImage
+              <ParallaxMedia
                 src={content.imageUrl}
                 alt={heading}
                 sizes="(min-width: 768px) 38vw, 90vw"

@@ -59,3 +59,32 @@ export function paragraphs(text: string) {
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 }
+
+const CLOUDINARY_VIDEO = /res\.cloudinary\.com\/[^/]+\/video\/upload\//;
+const VIDEO_EXTENSION = /\.(mp4|webm|mov|m4v|ogv)(?=$|[?#])/i;
+// Cloudinary files audio under /video/upload/ too, so exclude it explicitly.
+const AUDIO_EXTENSION = /\.(mp3|wav|m4a|aac|ogg|oga|flac)(?=$|[?#])/i;
+const FILE_EXTENSION = /\.[a-z0-9]+(?=$|[?#])/i;
+
+// Media fields store a bare URL, so the kind is inferred from the link.
+export function isVideoUrl(url: string | null | undefined) {
+  if (!url || AUDIO_EXTENSION.test(url)) return false;
+  return CLOUDINARY_VIDEO.test(url) || VIDEO_EXTENSION.test(url);
+}
+
+// Loops always play muted, so drop the audio track and cap the width;
+// forcing .mp4 makes Cloudinary transcode .mov uploads to H.264.
+export function optimizedVideoUrl(url: string) {
+  if (!CLOUDINARY_VIDEO.test(url)) return null;
+  return url
+    .replace("/video/upload/", "/video/upload/ac_none,q_auto,w_1600,c_limit/")
+    .replace(FILE_EXTENSION, ".mp4");
+}
+
+// Requesting a Cloudinary video as .jpg returns a still of the given frame.
+export function videoPosterUrl(url: string) {
+  if (!CLOUDINARY_VIDEO.test(url)) return null;
+  return url
+    .replace("/video/upload/", "/video/upload/so_0,q_auto,w_1600,c_limit/")
+    .replace(FILE_EXTENSION, ".jpg");
+}

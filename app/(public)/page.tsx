@@ -1,5 +1,5 @@
-import Image from "@/components/SmartImage";
 import { getFeaturedWork, getSiteSettings } from "@/lib/sections";
+import SmartMedia from "@/components/SmartMedia";
 import Reveal from "@/components/motion/Reveal";
 import Hero from "@/components/public/Hero";
 import Marquee from "@/components/public/Marquee";
@@ -38,10 +38,9 @@ export default async function HomePage() {
             <p className="label-caps text-muted">Summary</p>
             {settings.bioImageUrl && (
               <div className="relative mt-6 aspect-[4/5] overflow-hidden rounded-xl">
-                <Image
+                <SmartMedia
                   src={settings.bioImageUrl}
                   alt={name}
-                  fill
                   sizes="(min-width: 768px) 20vw, 90vw"
                   className="object-cover"
                 />
