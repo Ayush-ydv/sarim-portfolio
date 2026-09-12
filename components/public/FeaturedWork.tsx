@@ -87,8 +87,7 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
   return (
     <section className="mx-auto max-w-6xl px-6 py-24 md:py-32">
       <Reveal>
-        <p className="label-caps text-muted">Selected work</p>
-        <h2 className="mt-4 font-display text-h1 text-foreground">Recent cuts</h2>
+        <h2 className="font-display text-h1 text-foreground">Recent cuts</h2>
       </Reveal>
 
       <div className="mt-14 columns-2 gap-3 md:columns-3 md:gap-4">
