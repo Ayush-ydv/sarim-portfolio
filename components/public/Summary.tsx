@@ -12,11 +12,12 @@ export default function Summary({
 }) {
   return (
     <section className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-      <Reveal className="grid gap-8 border-y border-foreground py-10 md:grid-cols-12 md:gap-12 md:py-14">
-        <div className="md:col-span-3">
-          <p className="label-caps text-muted">Summary</p>
+      <Reveal className="border-y border-foreground py-10 md:py-14">
+        {/* Label on its own row so the photo and text start on the same line. */}
+        <p className="label-caps text-muted">Summary</p>
+        <div className="mt-8 grid gap-8 md:grid-cols-12 md:items-center md:gap-12">
           {bioImageUrl && (
-            <div className="relative mt-6 aspect-[4/5] overflow-hidden rounded-xl">
+            <div className="relative aspect-[4/5] max-w-xs overflow-hidden rounded-xl md:col-span-3 md:max-w-none">
               <SmartMedia
                 src={bioImageUrl}
                 alt={name}
@@ -25,10 +26,12 @@ export default function Summary({
               />
             </div>
           )}
+          <p
+            className={`whitespace-pre-line font-display text-lede text-foreground ${bioImageUrl ? "md:col-span-9" : "md:col-span-12"}`}
+          >
+            {bioText}
+          </p>
         </div>
-        <p className="whitespace-pre-line font-display text-lede text-foreground md:col-span-9">
-          {bioText}
-        </p>
       </Reveal>
     </section>
   );
