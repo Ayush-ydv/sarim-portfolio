@@ -77,7 +77,7 @@ export default async function HomePage() {
       <CtaBand
         text={settings.ctaText}
         email={settings.email}
-        buttonLabel={settings.ctaButtonLabel}
+        projectTypes={categories.map((category) => category.navLabel)}
       />
     </>
   );

@@ -162,11 +162,15 @@ model ResumeEntry {
   order        Int        @default(0)
 }
 
+// Booking requests from the homepage contact form
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  message   String   @db.Text
-  createdAt DateTime @default(now())
-  read      Boolean  @default(false)
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  projectType String? // optional: a Work category or "Other"
+  budget      String? // optional: one of BUDGET_OPTIONS
+  timeline    String? // optional: one of TIMELINE_OPTIONS
+  message     String   @db.Text
+  createdAt   DateTime @default(now())
+  read        Boolean  @default(false)
 }
