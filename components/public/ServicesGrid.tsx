@@ -1,5 +1,7 @@
 import type { Service } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";
+import Parallax from "@/components/motion/Parallax";
+import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
 import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 
 const tints = ["bg-lavender", "bg-mint", "bg-blush", "bg-sun"];
@@ -14,7 +16,9 @@ export default function ServicesGrid({
   if (services.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+    <section className="relative isolate">
+      <ParallaxOrbs preset="services" />
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
       <Reveal>
         <p className="label-caps text-muted">Services</p>
         <h2 className="mt-4 max-w-3xl font-display text-h1 text-balance text-foreground">
@@ -25,6 +29,8 @@ export default function ServicesGrid({
       <StaggerGroup className="mt-14 grid gap-5 md:grid-cols-3">
         {services.map((service, index) => (
           <StaggerItem key={service.id} className="h-full">
+            {/* The middle card of each row rises faster than its neighbours. */}
+            <Parallax speed={index % 3 === 1 ? -140 : 60} mobile={false} className="h-full">
             <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-rule bg-surface p-8 transition-[transform,box-shadow] duration-500 ease-out-expo hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-32px_rgb(23_22_20/0.45)] md:p-10">
               <span
                 aria-hidden
@@ -40,9 +46,11 @@ export default function ServicesGrid({
                 {service.description}
               </p>
             </article>
+            </Parallax>
           </StaggerItem>
         ))}
       </StaggerGroup>
+      </div>
     </section>
   );
 }

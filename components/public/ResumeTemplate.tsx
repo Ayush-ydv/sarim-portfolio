@@ -1,5 +1,6 @@
 import type { getSectionBySlug } from "@/lib/sections";
 import Reveal from "@/components/motion/Reveal";
+import Parallax from "@/components/motion/Parallax";
 import { paragraphs } from "@/lib/media";
 
 type Section = NonNullable<Awaited<ReturnType<typeof getSectionBySlug>>>;
@@ -30,9 +31,11 @@ export default function ResumeTemplate({ section }: { section: Section }) {
       <Reveal className="flex flex-wrap items-end justify-between gap-6 border-b border-foreground pb-10">
         <div>
           <p className="label-caps text-muted">Curriculum vitae</p>
-          <h1 className="mt-4 font-display text-h1 text-foreground">
-            {section.navLabel}
-          </h1>
+          <Parallax speed={-160} axis="x">
+            <h1 className="mt-4 font-display text-h1 text-foreground">
+              {section.navLabel}
+            </h1>
+          </Parallax>
         </div>
         {resume?.resumeFileUrl && (
           <a
@@ -57,14 +60,15 @@ export default function ResumeTemplate({ section }: { section: Section }) {
               key={entry.id}
               className="grid gap-6 border-b border-rule py-12 md:grid-cols-12 md:gap-12"
             >
-              <div className="md:col-span-4">
+              {/* The section title drifts slower than the details beside it. */}
+              <Parallax speed={140} mobile={false} className="md:col-span-4">
                 <span className="font-display text-sm text-muted">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <h2 className="mt-3 font-display text-3xl text-foreground">
                   {entry.heading}
                 </h2>
-              </div>
+              </Parallax>
               <div className="space-y-6 md:col-span-8">
                 {paragraphs(entry.body).map((paragraph, i) => {
                   const chips = asChips(paragraph);

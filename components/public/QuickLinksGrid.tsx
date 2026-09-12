@@ -1,6 +1,6 @@
 import type { QuickLink } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";
-import SmartMedia from "@/components/SmartMedia";
+import ParallaxMedia from "@/components/motion/ParallaxMedia";
 
 // Tiles have no stored dimensions, so varied aspect ratios on a CSS column
 // layout give the reference's masonry rhythm.
@@ -36,11 +36,13 @@ export default function QuickLinksGrid({ links }: { links: QuickLink[] }) {
           const url = link.url.trim();
           const tileClass = `group relative block overflow-hidden rounded-xl bg-lavender ${aspects[index % aspects.length]}`;
           const media = link.thumbnailUrl && (
-            <SmartMedia
+            // The media drifts inside its tile as the page scrolls.
+            <ParallaxMedia
               src={link.thumbnailUrl}
               alt=""
               sizes="(min-width: 768px) 30vw, 45vw"
-              className="object-cover transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.07]"
+              mediaClassName="object-cover transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.07]"
+              className="h-full w-full"
             />
           );
 

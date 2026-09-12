@@ -36,10 +36,17 @@ export default function PublicLayout({
       </a>
       <ScrollProgress />
       <Header />
-      <main id="main" className="flex-1">
+      {/* On larger screens the page lifts away to reveal the footer, which
+          sits still underneath (sticky, one layer below the content). */}
+      <main
+        id="main"
+        className="relative z-10 flex-1 bg-background md:rounded-b-[2.5rem] md:shadow-[0_40px_80px_-40px_rgb(23_22_20/0.35)]"
+      >
         {children}
       </main>
-      <Footer />
+      <div className="md:sticky md:bottom-0 md:z-0">
+        <Footer />
+      </div>
       {/* Scroll reveals start hidden until JS runs; without JS, show everything. */}
       <noscript>
         <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>

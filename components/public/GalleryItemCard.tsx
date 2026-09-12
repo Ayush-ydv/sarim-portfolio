@@ -1,5 +1,6 @@
 import type { GalleryItem } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";
+import Parallax from "@/components/motion/Parallax";
 import VideoPlayer from "@/components/public/VideoPlayer";
 import {
   isVertical,
@@ -122,20 +123,25 @@ export default function GalleryItemCard({
       className="grid scroll-mt-28 items-center gap-8 md:grid-cols-12 md:gap-14"
     >
       <Reveal className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}>
-        <div className={vertical ? "mx-auto w-full max-w-[20rem] md:max-w-[22rem]" : undefined}>
-          <GalleryMedia
-            item={item}
-            index={index}
-            client={client}
-            project={project}
-            vertical={vertical}
-          />
-        </div>
+        {/* The video lags behind; the text and its big number rush past it. */}
+        <Parallax speed={120} mobile={false}>
+          <div className={vertical ? "mx-auto w-full max-w-[20rem] md:max-w-[22rem]" : undefined}>
+            <GalleryMedia
+              item={item}
+              index={index}
+              client={client}
+              project={project}
+              vertical={vertical}
+            />
+          </div>
+        </Parallax>
       </Reveal>
       <Reveal delay={0.12} className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
-        <span className="font-display text-6xl leading-none text-foreground/15 md:text-7xl">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+        <Parallax speed={-320} mobile={false}>
+          <span className="block font-display text-6xl leading-none text-foreground/15 md:text-[9rem]">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </Parallax>
         {client && <p className="label-caps mt-6 text-muted">{client}</p>}
         <h2 className="mt-3 font-display text-h2 text-foreground">{project}</h2>
         {meta && (

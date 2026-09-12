@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getWorkCategories } from "@/lib/sections";
 import { videoThumbnail } from "@/lib/media";
-import SmartMedia from "@/components/SmartMedia";
+import ParallaxMedia from "@/components/motion/ParallaxMedia";
+import Parallax from "@/components/motion/Parallax";
+import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
+import OutlineBand from "@/components/motion/OutlineBand";
 import Reveal from "@/components/motion/Reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 
@@ -14,8 +17,14 @@ export default async function WorkPage() {
   const categories = await getWorkCategories();
 
   return (
+    <div className="relative isolate">
+    <ParallaxOrbs preset="hub" />
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-16 md:pb-32 md:pt-24">
-      <Reveal className="border-b border-foreground pb-10">
+      <Reveal className="relative isolate border-b border-foreground pb-10">
+        <OutlineBand
+          text={["Work", ...categories.map((category) => category.navLabel)].join(" · ")}
+          className="top-2"
+        />
         <p className="label-caps text-muted">Portfolio</p>
         <h1 className="mt-4 font-display text-h1 text-foreground">Work</h1>
       </Reveal>
@@ -25,7 +34,7 @@ export default async function WorkPage() {
           No work categories yet.
         </p>
       ) : (
-        <StaggerGroup className="mt-14 grid gap-5 md:mt-16 md:grid-cols-3">
+        <StaggerGroup className="mt-14 grid gap-5 md:mt-24 md:grid-cols-3 md:pb-16">
           {categories.map((category, index) => {
             const firstItem = category.galleryItems[0];
             const cover =
@@ -34,16 +43,19 @@ export default async function WorkPage() {
 
             return (
               <StaggerItem key={category.id}>
+                {/* The middle card rises faster; each cover drifts inside its card. */}
+                <Parallax speed={index % 3 === 1 ? -180 : 80} mobile={false}>
                 <Link
                   href={`/${category.slug}`}
                   className="group relative block aspect-[3/4] overflow-hidden rounded-2xl bg-foreground"
                 >
                   {cover && (
-                    <SmartMedia
+                    <ParallaxMedia
                       src={cover}
                       alt=""
                       sizes="(min-width: 768px) 32vw, 100vw"
-                      className="object-cover opacity-85 transition duration-[1.2s] ease-out-expo group-hover:scale-[1.05] group-hover:opacity-100"
+                      mediaClassName="object-cover opacity-85 transition duration-[1.2s] ease-out-expo group-hover:scale-[1.05] group-hover:opacity-100"
+                      className="h-full w-full"
                     />
                   )}
                   <span
@@ -74,11 +86,13 @@ export default async function WorkPage() {
                     </span>
                   </div>
                 </Link>
+                </Parallax>
               </StaggerItem>
             );
           })}
         </StaggerGroup>
       )}
+    </div>
     </div>
   );
 }

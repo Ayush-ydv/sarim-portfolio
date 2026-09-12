@@ -1,5 +1,6 @@
 import Reveal from "@/components/motion/Reveal";
 import BookingForm from "@/components/public/BookingForm";
+import Parallax from "@/components/motion/Parallax";
 
 export default function CtaBand({
   text,
@@ -19,6 +20,7 @@ export default function CtaBand({
       <div className="wash-mint relative overflow-hidden rounded-[2rem] px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-12 lg:gap-16">
           <Reveal className="lg:col-span-5">
+            <Parallax speed={-120} mobile={false}>
             <p className="label-caps text-foreground/70">Let&apos;s work together</p>
             <h2
               id="contact-heading"
@@ -33,6 +35,7 @@ export default function CtaBand({
             >
               {email}
             </a>
+            </Parallax>
           </Reveal>
           <Reveal delay={0.1} className="relative lg:col-span-7">
             <BookingForm projectTypes={projectTypes} />

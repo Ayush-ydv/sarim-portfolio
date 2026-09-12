@@ -5,6 +5,7 @@ import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 import CategoryNav from "@/components/public/CategoryNav";
 import GalleryItemCard from "@/components/public/GalleryItemCard";
 import ReelCard from "@/components/public/ReelCard";
+import Parallax from "@/components/motion/Parallax";
 
 type Section = NonNullable<Awaited<ReturnType<typeof getSectionBySlug>>>;
 
@@ -58,7 +59,10 @@ export default function GalleryTemplate({
         >
           {items.map((item, index) => (
             <StaggerItem key={item.id}>
-              <ReelCard item={item} index={index} />
+              {/* Alternate reels drift up and down against each other. */}
+              <Parallax speed={index % 2 === 0 ? 90 : -150} mobile={false}>
+                <ReelCard item={item} index={index} />
+              </Parallax>
             </StaggerItem>
           ))}
         </StaggerGroup>

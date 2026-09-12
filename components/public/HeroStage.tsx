@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
 import ParallaxMedia from "@/components/motion/ParallaxMedia";
+import { useParallaxScale } from "@/components/motion/useParallaxScale";
 
 export type HeroShape = "portrait" | "square" | "landscape";
 
@@ -83,13 +85,26 @@ export default function HeroStage({
 
   const layout = LAYOUT[shape];
 
+  // Scrolling away from the hero: the name rises and fades while the card
+  // sinks and shrinks a little, pulling the two layers apart.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const scale = useParallaxScale();
+  const { scrollYProgress } = useScroll({ target: stageRef, offset: ["start start", "end start"] });
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -160 * scale]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.75], [1, scale ? 0 : 1]);
+  const cardY = useTransform(scrollYProgress, [0, 1], [0, 120 * scale]);
+  const cardScale = useTransform(scrollYProgress, [0, 1], [1, 1 - 0.08 * scale]);
+
   return (
     <div
+      ref={stageRef}
       className={`grid items-center gap-14 transition-[grid-template-columns] duration-700 ease-out-expo lg:gap-16 ${layout.grid}`}
     >
-      <div className="min-w-0">{children}</div>
+      <motion.div className="min-w-0" style={{ y: textY, opacity: textOpacity }}>
+        {children}
+      </motion.div>
 
-      <div className="min-w-0">
+      <motion.div className="min-w-0" style={{ y: cardY, scale: cardScale }}>
         <div
           className={`relative mx-auto w-full transition-[max-width] duration-700 ease-out-expo lg:mr-0 ${layout.frame}`}
         >
@@ -117,7 +132,7 @@ export default function HeroStage({
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

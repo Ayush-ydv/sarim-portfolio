@@ -1,9 +1,9 @@
 import type { Brand } from "@prisma/client";
 import SmartImage from "@/components/SmartImage";
+import BrandParallax from "@/components/public/BrandParallax";
 
-// CSS-driven, no JS. Two identical copies slide left by half their combined
-// width for a seamless loop, so the strip keeps moving to the left. Each copy
-// repeats the brands enough to be wider than any viewport.
+// The logos are laid out here on the server; BrandParallax moves them. The
+// row repeats the brands enough to be wider than any viewport.
 export default function BrandMarquee({ brands }: { brands: Brand[] }) {
   if (brands.length === 0) return null;
   const repeated = Array.from(
@@ -12,11 +12,8 @@ export default function BrandMarquee({ brands }: { brands: Brand[] }) {
   ).flat();
 
   return (
-    <section
-      aria-labelledby="brands-heading"
-      className="border-b border-rule bg-surface py-12 md:py-16"
-    >
-      <p id="brands-heading" className="label-caps text-center text-muted">
+    <section aria-labelledby="brands-heading" className="border-b border-rule bg-surface">
+      <p id="brands-heading" className="sr-only">
         Brands I&apos;ve worked with
       </p>
       <ul className="sr-only">
@@ -24,36 +21,32 @@ export default function BrandMarquee({ brands }: { brands: Brand[] }) {
           <li key={brand.id}>{brand.name}</li>
         ))}
       </ul>
-      <div
-        aria-hidden
-        className="group mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
-      >
-        <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
-          {[0, 1].map((copy) => (
-            <ul key={copy} className="flex shrink-0 items-center">
-              {repeated.map((brand, index) => (
-                <li key={index} className="flex h-16 items-center px-10 md:px-14">
-                  {brand.logoUrl ? (
-                    <span className="relative block h-12 w-36 md:h-14 md:w-40">
-                      <SmartImage
-                        src={brand.logoUrl}
-                        alt=""
-                        fill
-                        sizes="160px"
-                        className="object-contain opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0"
-                      />
-                    </span>
-                  ) : (
-                    <span className="whitespace-nowrap font-display text-3xl italic text-foreground/80 md:text-4xl">
-                      {brand.name}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
-      </div>
+      <BrandParallax
+        label="Brands I've worked with"
+        logos={
+          <ul className="flex shrink-0 items-center">
+            {repeated.map((brand, index) => (
+              <li key={index} className="flex h-16 items-center px-10 md:h-20 md:px-14">
+                {brand.logoUrl ? (
+                  <span className="relative block h-12 w-36 md:h-16 md:w-44">
+                    <SmartImage
+                      src={brand.logoUrl}
+                      alt=""
+                      fill
+                      sizes="176px"
+                      className="object-contain"
+                    />
+                  </span>
+                ) : (
+                  <span className="whitespace-nowrap font-display text-3xl italic text-foreground md:text-5xl">
+                    {brand.name}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        }
+      />
     </section>
   );
 }
