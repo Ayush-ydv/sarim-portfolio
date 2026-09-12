@@ -1,8 +1,8 @@
 // Decides which looping collage tiles may play. Decoding several videos at
 // once is what makes scrolling stutter: phones have only a few hardware
 // decoders and fall back to slow software decoding for the rest. So only the
-// tiles nearest the middle of the screen play — one on phones and weaker
-// devices, three on larger screens — and the rest hold their poster.
+// tile nearest the middle of the screen plays on phones, while larger
+// screens play every visible tile; the rest hold their poster.
 
 type Loop = { el: Element; ratio: number; playing: boolean; play: () => void; pause: () => void };
 
@@ -21,9 +21,11 @@ function playLimit() {
   };
   // Data saver or a very slow connection: posters only.
   if (nav.connection?.saveData || /2g/.test(nav.connection?.effectiveType ?? "")) return 0;
-  const phone = window.matchMedia("(max-width: 767px)").matches;
-  const weak = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  return phone || weak ? 1 : 3;
+  // Phones: only the centred tile. Very low-memory devices: two.
+  // Laptops and tablets decode plain MP4s easily, so every visible tile plays.
+  if (window.matchMedia("(max-width: 767px)").matches) return 1;
+  if ((nav.deviceMemory ?? 8) <= 2) return 2;
+  return Infinity;
 }
 
 function update() {
