@@ -42,7 +42,7 @@ function TileMedia({ item, index }: { item: FeaturedItem; index: number }) {
         src={poster}
         alt=""
         fill
-        sizes="(min-width: 768px) 30vw, 50vw"
+        sizes="(min-width: 768px) 30vw, (min-width: 640px) 50vw, 100vw"
         className={`object-cover ${zoom}`}
       />
     );
@@ -90,7 +90,8 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
         <h2 className="font-display text-h1 text-foreground">Recent cuts</h2>
       </Reveal>
 
-      <div className="mt-14 columns-2 gap-3 md:columns-3 md:gap-4">
+      {/* Phones: one video per row, so each gets the full width. */}
+      <div className="mt-14 columns-1 gap-3 sm:columns-2 md:columns-3 md:gap-4">
         {interleave(items).map((item, index) => {
           // Reels keep 9:16. Films shot for the cinema (picture wider than 2:1,
           // i.e. letterboxed in a 16:9 file) get a matching wide tile so the

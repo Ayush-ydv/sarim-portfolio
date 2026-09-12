@@ -59,7 +59,11 @@ export default function VideoPlayer({
             src={thumbnail}
             alt=""
             fill
-            sizes={vertical ? "(min-width: 768px) 25vw, 50vw" : "(min-width: 768px) 58vw, 100vw"}
+            sizes={
+              vertical
+                ? "(min-width: 768px) 25vw, (min-width: 640px) 50vw, 100vw"
+                : "(min-width: 768px) 58vw, 100vw"
+            }
             className="object-cover opacity-90 transition duration-[1.2s] ease-out-expo group-hover:scale-[1.04] group-hover:opacity-100"
           />
         ) : (

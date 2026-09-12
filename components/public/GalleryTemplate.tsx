@@ -54,7 +54,7 @@ export default function GalleryTemplate({
       ) : section.galleryLayout === "VERTICAL" ? (
         <StaggerGroup
           stagger={0.08}
-          className="mt-16 grid grid-cols-2 gap-x-4 gap-y-12 md:mt-20 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4"
+          className="mt-16 grid grid-cols-1 gap-x-4 gap-y-14 sm:grid-cols-2 sm:gap-y-12 md:mt-20 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4"
         >
           {items.map((item, index) => (
             <StaggerItem key={item.id}>
