@@ -17,12 +17,15 @@ export default function ParallaxMedia({
   sizes,
   preload = false,
   className = "",
+  mediaClassName = "object-cover",
 }: {
   src: string;
   alt: string;
   sizes: string;
   preload?: boolean;
   className?: string;
+  /** Fit/position of the media itself, e.g. to keep a face in frame. */
+  mediaClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
@@ -43,7 +46,7 @@ export default function ParallaxMedia({
           alt={alt}
           sizes={sizes}
           preload={preload}
-          className="object-cover"
+          className={mediaClassName}
         />
       </motion.div>
     </div>
