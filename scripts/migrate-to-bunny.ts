@@ -3,11 +3,16 @@
 // item's title, description and poster frame, and backs up every row before
 // changing it. Steps:
 //
-//   npx tsx --env-file=.env.local  scripts/migrate-to-bunny.ts plan      what will happen
-//   npx tsx --env-file=.env.local  scripts/migrate-to-bunny.ts upload    upload + wait for Bunny
-//   npx tsx --env-file=.env.local  scripts/migrate-to-bunny.ts apply     switch the dev database
-//   npx tsx --env-file=.env.vercel scripts/migrate-to-bunny.ts apply     switch the live database
-//   npx tsx --env-file=<same>      scripts/migrate-to-bunny.ts restore scripts/backups/<file>.json
+//   npx tsx scripts/migrate-to-bunny.ts plan      what will happen
+//   npx tsx scripts/migrate-to-bunny.ts upload    upload + wait for Bunny
+//   npx tsx scripts/migrate-to-bunny.ts apply     switch the database
+//   npx tsx scripts/migrate-to-bunny.ts restore scripts/backups/<file>.json
+//
+// It uses whichever database DATABASE_URL points at: Prisma loads .env (the
+// dev database) unless the variable is already set, and tsx's --env-file
+// does NOT override that. For the live database, first set the variables
+// from .env.vercel in the shell, and check the host before running; the
+// backup filename also names the database it came from.
 //
 // scripts/.bunny-map.json remembers which Stream video became which Bunny
 // video, so upload is safe to re-run and apply works for both databases.
