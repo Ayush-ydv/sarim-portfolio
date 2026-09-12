@@ -7,21 +7,26 @@ function cfHeaders() {
   };
 }
 
-export async function createDirectUploadUrl(maxDurationSeconds = 3600) {
+// Creates a resumable upload (no size limit) that the browser can send
+// chunks to directly. Returns the one-time tus URL and the new video's id.
+export async function createTusUpload(uploadLength: string, uploadMetadata: string | null) {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const res = await fetch(
-    `${CF_API_BASE}/accounts/${accountId}/stream/direct_upload`,
-    {
-      method: "POST",
-      headers: cfHeaders(),
-      body: JSON.stringify({ maxDurationSeconds, requireSignedURLs: false }),
+  const res = await fetch(`${CF_API_BASE}/accounts/${accountId}/stream?direct_user=true`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.CLOUDFLARE_STREAM_API_TOKEN}`,
+      "Tus-Resumable": "1.0.0",
+      "Upload-Length": uploadLength,
+      ...(uploadMetadata ? { "Upload-Metadata": uploadMetadata } : {}),
     },
-  );
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(data.errors?.[0]?.message ?? "Failed to create upload URL");
+  });
+  const location = res.headers.get("Location");
+  const uid = res.headers.get("stream-media-id");
+  if (!res.ok || !location || !uid) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.errors?.[0]?.message ?? `Failed to create upload (${res.status})`);
   }
-  return { uploadURL: data.result.uploadURL as string, uid: data.result.uid as string };
+  return { location, uid };
 }
 
 export type StreamVideoStatus = {

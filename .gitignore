@@ -42,3 +42,7 @@ next-env.d.ts
 
 # local dev logs
 dev-server.log
+
+# source video files (already on Cloudflare Stream; too large for git)
+/public/videos/
+/public/hero image.png

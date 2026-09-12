@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Upload } from "tus-js-client";
 
 type UploadState = "idle" | "uploading" | "processing" | "ready" | "error";
 
@@ -10,6 +11,10 @@ export type UploadedVideo = {
   thumbnailUrl: string;
   aspectRatio: number | null;
 };
+
+// Cloudflare needs chunks in multiples of 256 KiB; 50 MiB keeps the request
+// count low while a dropped connection only costs one chunk.
+const CHUNK_SIZE = 50 * 1024 * 1024;
 
 export default function VideoUploader({
   streamVideoId,
@@ -21,11 +26,13 @@ export default function VideoUploader({
   onUploaded: (data: UploadedVideo) => void;
 }) {
   const [status, setStatus] = useState<UploadState>(streamVideoId ? "ready" : "idle");
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const uploadRef = useRef<Upload | null>(null);
 
   async function pollUntilReady(uid: string) {
-    for (let attempt = 0; attempt < 60; attempt += 1) {
+    // Long films can take several minutes for Cloudflare to process.
+    for (let attempt = 0; attempt < 180; attempt += 1) {
       const res = await fetch(`/api/upload/stream/status?uid=${uid}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Status check failed");
@@ -41,41 +48,59 @@ export default function VideoUploader({
         setStatus("ready");
         return;
       }
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 5000));
     }
-    throw new Error("Video is still processing — check back shortly.");
+    throw new Error("Video is still processing — save, then check back shortly.");
   }
 
-  async function handleFile(file: File) {
+  function handleFile(file: File) {
     setError(null);
+    setProgress(0);
     setStatus("uploading");
-    try {
-      const createRes = await fetch("/api/upload/stream", { method: "POST" });
-      const createData = await createRes.json();
-      if (!createRes.ok) throw new Error(createData.error ?? "Could not start upload");
 
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadRes = await fetch(createData.uploadURL, {
-        method: "POST",
-        body: formData,
-      });
-      if (!uploadRes.ok) throw new Error("Upload to Cloudflare Stream failed");
-
-      setStatus("processing");
-      await pollUntilReady(createData.uid);
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Upload failed");
-    }
+    let uid: string | null = null;
+    const upload = new Upload(file, {
+      endpoint: "/api/upload/stream",
+      chunkSize: CHUNK_SIZE,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      metadata: { name: file.name, filetype: file.type },
+      storeFingerprintForResuming: false,
+      onAfterResponse(req, res) {
+        const id = res.getHeader("stream-media-id");
+        if (req.getMethod() === "POST" && id) uid = id;
+      },
+      onProgress(sent, total) {
+        setProgress(Math.round((sent / total) * 100));
+      },
+      onError(err) {
+        setStatus("error");
+        setError(err.message.includes("Unauthorized") ? "Please sign in again." : "Upload failed — check your connection and try again.");
+      },
+      onSuccess() {
+        uploadRef.current = null;
+        const id = uid ?? upload.url?.split("/").pop()?.split("?")[0];
+        if (!id) {
+          setStatus("error");
+          setError("Upload finished but Cloudflare didn't return a video id.");
+          return;
+        }
+        setStatus("processing");
+        pollUntilReady(id).catch((err) => {
+          setStatus("error");
+          setError(err instanceof Error ? err.message : "Processing failed");
+        });
+      },
+    });
+    uploadRef.current = upload;
+    upload.start();
   }
 
   return (
     <div className="flex flex-col gap-2">
       <input
-        ref={inputRef}
         type="file"
         accept="video/*"
+        disabled={status === "uploading"}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
@@ -83,10 +108,26 @@ export default function VideoUploader({
         className="text-sm text-foreground"
       />
       {status === "uploading" && (
-        <p className="text-xs text-muted">Uploading…</p>
+        <div className="flex items-center gap-3">
+          <div className="h-1.5 w-48 overflow-hidden bg-rule">
+            <div className="h-full bg-foreground transition-[width]" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="text-xs text-muted">Uploading… {progress}%</p>
+          <button
+            type="button"
+            onClick={() => {
+              uploadRef.current?.abort(true);
+              uploadRef.current = null;
+              setStatus("idle");
+            }}
+            className="text-xs uppercase tracking-[0.18em] text-muted hover:text-foreground"
+          >
+            Cancel
+          </button>
+        </div>
       )}
       {status === "processing" && (
-        <p className="text-xs text-muted">Processing on Cloudflare Stream…</p>
+        <p className="text-xs text-muted">Processing on Cloudflare Stream… (large videos can take a few minutes)</p>
       )}
       {status === "ready" && (
         <div className="flex items-center gap-3">
