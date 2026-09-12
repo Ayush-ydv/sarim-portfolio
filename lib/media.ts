@@ -21,11 +21,12 @@ export function toEmbedUrl(url: string) {
   }
   const vimeo = vimeoId(url);
   if (vimeo) return `https://player.vimeo.com/video/${vimeo}?autoplay=1`;
-  if (
-    url.includes("mediadelivery.net") ||
-    url.includes("cloudflarestream.com") ||
-    url.includes("videodelivery.net")
-  ) {
+  // Bunny's player assumes a 16:9 box unless told to fit its frame, which
+  // cropped vertical reels and shifted them off-centre.
+  if (url.includes("mediadelivery.net")) {
+    return `${url}${url.includes("?") ? "&" : "?"}autoplay=true&responsive=true&preload=true`;
+  }
+  if (url.includes("cloudflarestream.com") || url.includes("videodelivery.net")) {
     return `${url}${url.includes("?") ? "&" : "?"}autoplay=true`;
   }
   return url;

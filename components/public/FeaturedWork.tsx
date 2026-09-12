@@ -116,9 +116,11 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
                 className={`group relative block overflow-hidden rounded-xl bg-foreground ${aspect}`}
               >
                 <TileMedia item={item} index={index} />
+                {/* Captions reveal on hover; touch screens can't hover, so
+                    there they show all the time. */}
                 <span
                   aria-hidden
-                  className="absolute inset-0 bg-linear-to-t from-foreground/75 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+                  className="absolute inset-0 bg-linear-to-t from-foreground/75 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
                 />
                 <span
                   aria-hidden
@@ -128,7 +130,7 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
                 </span>
                 <span
                   aria-hidden
-                  className="absolute inset-x-4 bottom-4 translate-y-2 font-display text-lg leading-tight text-background opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+                  className="absolute inset-x-3 bottom-3 translate-y-2 font-display text-base leading-tight text-background opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 md:inset-x-4 md:bottom-4 md:text-lg [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100"
                 >
                   {project}
                 </span>

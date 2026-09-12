@@ -9,7 +9,7 @@ import {
 } from "@/lib/bookingOptions";
 
 const field =
-  "w-full rounded-xl border border-foreground/15 bg-surface/80 px-4 py-3 text-[0.95rem] text-foreground placeholder:text-muted/80 focus:border-foreground focus:outline-none";
+  "w-full rounded-xl border border-foreground/15 bg-surface/80 px-4 py-3 text-base text-foreground md:text-[0.95rem] placeholder:text-muted/80 focus:border-foreground focus:outline-none";
 const label = "text-[0.68rem] font-medium uppercase tracking-[0.2em] text-foreground/70";
 
 function Select({
