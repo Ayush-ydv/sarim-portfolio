@@ -15,12 +15,15 @@ export default function Parallax({
   speed = 120,
   axis = "y",
   mobile = true,
+  spin = 0,
   className,
 }: {
   children: React.ReactNode;
   speed?: number;
   axis?: "x" | "y";
   mobile?: boolean;
+  /** Degrees it turns over its pass through the viewport (decor only). */
+  spin?: number;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,12 +34,13 @@ export default function Parallax({
   });
   const travel = speed * scale;
   const offset = useTransform(scrollYProgress, [0, 1], [-travel / 2, travel / 2]);
+  const turn = useTransform(scrollYProgress, [0, 1], [(-spin * scale) / 2, (spin * scale) / 2]);
 
   return (
     <motion.div
       ref={ref}
       className={className}
-      style={axis === "y" ? { y: offset } : { x: offset }}
+      style={{ ...(axis === "y" ? { y: offset } : { x: offset }), ...(spin ? { rotate: turn } : {}) }}
     >
       {children}
     </motion.div>

@@ -5,6 +5,7 @@ import Parallax from "@/components/motion/Parallax";
 import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
 import OutlineBand from "@/components/motion/OutlineBand";
 import ScrollZoom from "@/components/motion/ScrollZoom";
+import EditDecor from "@/components/decor/EditDecor";
 import StreamLoop from "@/components/motion/StreamLoop";
 import BackgroundEmbed from "@/components/motion/BackgroundEmbed";
 import type { FeaturedItem } from "@/lib/sections";
@@ -128,6 +129,7 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
   return (
     <section className="relative isolate">
       <ParallaxOrbs preset="work" />
+      <EditDecor preset="work" />
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
       <div className="relative isolate">
         <OutlineBand text="Recent cuts" className="-top-6 md:-top-12" />

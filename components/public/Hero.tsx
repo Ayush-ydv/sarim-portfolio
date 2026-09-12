@@ -1,6 +1,7 @@
 import Link from "next/link";
 import HeroStage, { type HeroShape } from "@/components/public/HeroStage";
 import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
+import EditDecor from "@/components/decor/EditDecor";
 import { backgroundEmbedUrl, isVideoUrl } from "@/lib/media";
 
 // The entrance is CSS keyframes rather than Framer so the name (the likely
@@ -36,6 +37,7 @@ export default function Hero({
   return (
     <section className="wash-hero relative isolate overflow-hidden border-b border-rule">
       <ParallaxOrbs preset="hero" />
+      <EditDecor preset="hero" />
       <div className="mx-auto flex max-w-[92rem] flex-col justify-center px-6 pb-20 pt-12 md:min-h-[calc(100svh-5.5rem)] md:px-12 md:py-20 lg:px-20">
         <HeroStage
           src={src}

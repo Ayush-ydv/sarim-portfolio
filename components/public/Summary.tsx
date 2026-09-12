@@ -1,6 +1,7 @@
 import ParallaxMedia from "@/components/motion/ParallaxMedia";
 import Parallax from "@/components/motion/Parallax";
 import Reveal from "@/components/motion/Reveal";
+import EditDecor from "@/components/decor/EditDecor";
 
 export default function Summary({
   name,
@@ -12,7 +13,8 @@ export default function Summary({
   bioImageUrl: string | null;
 }) {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+    <section className="relative isolate mx-auto max-w-6xl px-6 py-24 md:py-32">
+      <EditDecor preset="summary" />
       <Reveal className="border-y border-foreground py-10 md:py-14">
         <div className="grid gap-8 md:grid-cols-12 md:items-center md:gap-12">
           {bioImageUrl && (

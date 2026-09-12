@@ -6,6 +6,7 @@ import ParallaxMedia from "@/components/motion/ParallaxMedia";
 import Parallax from "@/components/motion/Parallax";
 import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
 import OutlineBand from "@/components/motion/OutlineBand";
+import EditDecor from "@/components/decor/EditDecor";
 import Reveal from "@/components/motion/Reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 
@@ -19,6 +20,7 @@ export default async function WorkPage() {
   return (
     <div className="relative isolate">
     <ParallaxOrbs preset="hub" />
+    <EditDecor preset="hub" />
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-16 md:pb-32 md:pt-24">
       <Reveal className="relative isolate border-b border-foreground pb-10">
         <OutlineBand

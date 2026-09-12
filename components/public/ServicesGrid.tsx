@@ -2,6 +2,7 @@ import type { Service } from "@prisma/client";
 import Reveal from "@/components/motion/Reveal";
 import Parallax from "@/components/motion/Parallax";
 import ParallaxOrbs from "@/components/motion/ParallaxOrbs";
+import EditDecor from "@/components/decor/EditDecor";
 import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 
 const tints = ["bg-lavender", "bg-mint", "bg-blush", "bg-sun"];
@@ -18,6 +19,7 @@ export default function ServicesGrid({
   return (
     <section className="relative isolate">
       <ParallaxOrbs preset="services" />
+      <EditDecor preset="services" />
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
       <Reveal>
         <p className="label-caps text-muted">Services</p>

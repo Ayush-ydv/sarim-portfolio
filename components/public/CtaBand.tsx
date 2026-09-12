@@ -1,6 +1,7 @@
 import Reveal from "@/components/motion/Reveal";
 import BookingForm from "@/components/public/BookingForm";
 import Parallax from "@/components/motion/Parallax";
+import EditDecor from "@/components/decor/EditDecor";
 
 export default function CtaBand({
   text,
@@ -17,7 +18,8 @@ export default function CtaBand({
       aria-labelledby="contact-heading"
       className="scroll-mt-24 p-3 md:p-6"
     >
-      <div className="wash-mint relative overflow-hidden rounded-[2rem] px-6 py-20 md:px-12 md:py-28">
+      <div className="wash-mint relative isolate overflow-hidden rounded-[2rem] px-6 py-20 md:px-12 md:py-28">
+        <EditDecor preset="cta" />
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-12 lg:gap-16">
           <Reveal className="lg:col-span-5">
             <Parallax speed={-120} mobile={false}>
