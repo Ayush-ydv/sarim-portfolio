@@ -12,8 +12,17 @@ export type UploadedVideo = {
   aspectRatio: number | null;
 };
 
-// Cloudflare needs chunks in multiples of 256 KiB; 50 MiB keeps the request
-// count low while a dropped connection only costs one chunk.
+type SignedUpload = {
+  endpoint: string;
+  libraryId: string;
+  videoId: string;
+  expires: number;
+  signature: string;
+  predicted: { mediaUrl: string; thumbnailUrl: string };
+};
+
+// 50 MiB keeps the request count low while a dropped connection only costs
+// one chunk.
 const CHUNK_SIZE = 50 * 1024 * 1024;
 
 export default function VideoUploader({
@@ -27,65 +36,91 @@ export default function VideoUploader({
 }) {
   const [status, setStatus] = useState<UploadState>(streamVideoId ? "ready" : "idle");
   const [progress, setProgress] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const uploadRef = useRef<Upload | null>(null);
 
-  async function pollUntilReady(uid: string) {
-    // Long films can take several minutes for Cloudflare to process.
+  async function pollUntilReady(signed: SignedUpload) {
+    // Long 4K films can take a while for Bunny to transcode.
     for (let attempt = 0; attempt < 180; attempt += 1) {
-      const res = await fetch(`/api/upload/stream/status?uid=${uid}`);
+      const res = await fetch(`/api/upload/stream/status?uid=${signed.videoId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Status check failed");
+      if (data.failed) throw new Error("Bunny couldn't process this video. Try exporting it as MP4 (H.264).");
 
-      if (data.readyToStream && data.iframeUrl) {
+      if (data.readyToStream) {
         onUploaded({
-          streamVideoId: uid,
+          streamVideoId: signed.videoId,
           mediaUrl: data.iframeUrl,
-          thumbnailUrl: data.thumbnail ?? "",
+          thumbnailUrl: data.thumbnail,
           // Lets the site lay the video out tall or wide, whatever category it's in.
           aspectRatio: data.width && data.height ? data.width / data.height : null,
         });
         setStatus("ready");
         return;
       }
+      setProgress(data.encodeProgress ?? 0);
       await new Promise((r) => setTimeout(r, 5000));
     }
-    throw new Error("Video is still processing — save, then check back shortly.");
+
+    // Still transcoding after 15 minutes: the video's address is already
+    // known, so let the admin save now; it appears on the site once ready.
+    onUploaded({
+      streamVideoId: signed.videoId,
+      mediaUrl: signed.predicted.mediaUrl,
+      thumbnailUrl: signed.predicted.thumbnailUrl,
+      aspectRatio: null,
+    });
+    setNotice("Still processing on Bunny. You can save now; it will appear on the site once ready.");
+    setStatus("ready");
   }
 
-  function handleFile(file: File) {
+  async function handleFile(file: File) {
     setError(null);
+    setNotice(null);
     setProgress(0);
     setStatus("uploading");
 
-    let uid: string | null = null;
+    let signed: SignedUpload;
+    try {
+      const res = await fetch("/api/upload/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, "") }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(res.status === 401 ? "Please sign in again." : data.error);
+      signed = data;
+    } catch (err) {
+      setStatus("error");
+      setError(err instanceof Error && err.message ? err.message : "Could not start upload");
+      return;
+    }
+
     const upload = new Upload(file, {
-      endpoint: "/api/upload/stream",
+      endpoint: signed.endpoint,
       chunkSize: CHUNK_SIZE,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      metadata: { name: file.name, filetype: file.type },
-      storeFingerprintForResuming: false,
-      onAfterResponse(req, res) {
-        const id = res.getHeader("stream-media-id");
-        if (req.getMethod() === "POST" && id) uid = id;
+      headers: {
+        AuthorizationSignature: signed.signature,
+        AuthorizationExpire: String(signed.expires),
+        VideoId: signed.videoId,
+        LibraryId: String(signed.libraryId),
       },
+      metadata: { filetype: file.type, title: file.name },
+      storeFingerprintForResuming: false,
       onProgress(sent, total) {
         setProgress(Math.round((sent / total) * 100));
       },
-      onError(err) {
+      onError() {
         setStatus("error");
-        setError(err.message.includes("Unauthorized") ? "Please sign in again." : "Upload failed — check your connection and try again.");
+        setError("Upload failed — check your connection and try again.");
       },
       onSuccess() {
         uploadRef.current = null;
-        const id = uid ?? upload.url?.split("/").pop()?.split("?")[0];
-        if (!id) {
-          setStatus("error");
-          setError("Upload finished but Cloudflare didn't return a video id.");
-          return;
-        }
+        setProgress(0);
         setStatus("processing");
-        pollUntilReady(id).catch((err) => {
+        pollUntilReady(signed).catch((err) => {
           setStatus("error");
           setError(err instanceof Error ? err.message : "Processing failed");
         });
@@ -100,7 +135,7 @@ export default function VideoUploader({
       <input
         type="file"
         accept="video/*"
-        disabled={status === "uploading"}
+        disabled={status === "uploading" || status === "processing"}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
@@ -127,12 +162,14 @@ export default function VideoUploader({
         </div>
       )}
       {status === "processing" && (
-        <p className="text-xs text-muted">Processing on Cloudflare Stream… (large videos can take a few minutes)</p>
+        <p className="text-xs text-muted">
+          Processing on Bunny… {progress > 0 ? `${progress}%` : ""} (large videos can take a few minutes)
+        </p>
       )}
       {status === "ready" && (
         <div className="flex items-center gap-3">
-          <p className="text-xs text-muted">Video ready.</p>
-          {thumbnailUrl && (
+          <p className="text-xs text-muted">{notice ?? "Video ready."}</p>
+          {thumbnailUrl && !notice && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={thumbnailUrl} alt="" className="h-12 w-20 object-cover" />
           )}

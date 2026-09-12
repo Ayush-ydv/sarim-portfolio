@@ -1,36 +1,26 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { createTusUpload } from "@/lib/cloudflareStream";
+import { bunnyUrls, createBunnyVideo, signTusUpload } from "@/lib/bunnyStream";
 
-// First step of a resumable (tus) upload. The admin's browser sends only the
-// file's size and name here; we ask Cloudflare for a one-time upload URL and
-// hand it back in Location. The browser then sends the video itself straight
-// to Cloudflare in chunks, so neither Vercel's request size limit nor
-// Cloudflare's 200 MB one-shot limit applies.
+// First step of an admin video upload: create the video on Bunny and hand the
+// browser a signed, single-use permission to upload it there directly (tus,
+// resumable, no size limit). The video itself never passes through Vercel.
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const uploadLength = request.headers.get("Upload-Length");
-  if (!uploadLength) {
-    return NextResponse.json({ error: "Missing Upload-Length" }, { status: 400 });
-  }
+  const body = await request.json().catch(() => ({}));
+  const title = String(body.title ?? "").trim().slice(0, 200) || "Untitled upload";
 
   try {
-    const { location, uid } = await createTusUpload(
-      uploadLength,
-      request.headers.get("Upload-Metadata"),
-    );
-    return new Response(null, {
-      status: 201,
-      headers: {
-        Location: location,
-        "stream-media-id": uid,
-        "Tus-Resumable": "1.0.0",
-        "Access-Control-Expose-Headers": "Location, stream-media-id",
-      },
+    const videoId = await createBunnyVideo(title);
+    const { embedUrl, thumbnailUrl } = bunnyUrls(videoId);
+    return NextResponse.json({
+      ...signTusUpload(videoId),
+      // Where the video will live, in case processing outlasts the admin's wait.
+      predicted: { mediaUrl: embedUrl, thumbnailUrl },
     });
   } catch (error) {
     return NextResponse.json(

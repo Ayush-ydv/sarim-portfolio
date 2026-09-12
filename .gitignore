@@ -46,3 +46,8 @@ dev-server.log
 # source video files (already on Cloudflare Stream; too large for git)
 /public/videos/
 /public/hero image.png
+/public/hero image 2.png
+
+# video migration state and database backups (local only)
+/scripts/.bunny-map.json
+/scripts/backups/

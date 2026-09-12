@@ -6,6 +6,7 @@ export const optimizedImageHosts = [
   "res.cloudinary.com",
   "images.unsplash.com",
   "i.ytimg.com",
+  "**.b-cdn.net",
   "**.cloudflarestream.com",
   "videodelivery.net",
 ];

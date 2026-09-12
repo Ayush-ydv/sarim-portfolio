@@ -3,14 +3,16 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "motion/react";
 import type Hls from "hls.js";
+import { registerLoop } from "@/components/motion/playbackCoordinator";
 
 const CLIP_SECONDS = 8;
 
-// Loops a short muted window of a Cloudflare Stream video, for collage tiles.
-// Stream serves HLS, which only Safari plays natively, so elsewhere hls.js is
+// Loops a short muted window of an uploaded video, for collage tiles.
+// The stream is HLS, which only Safari plays natively, so elsewhere hls.js is
 // loaded on demand and capped to the tile's size — a grid of tiles then pulls
-// small renditions instead of full 1080p. Like LoopVideo, it only plays while
-// on screen and stays on its poster for visitors who prefer reduced motion.
+// small renditions instead of full 1080p. The playback coordinator decides
+// when each tile plays (only the few most visible at once), and the player
+// isn't created until a tile first plays. Reduced motion keeps the poster.
 export default function StreamLoop({
   src,
   poster,
@@ -32,11 +34,10 @@ export default function StreamLoop({
     video.muted = true;
 
     let hls: Hls | null = null;
-    let attached = false;
+    let attaching: Promise<void> | null = null;
     let cancelled = false;
 
     const attach = async () => {
-      attached = true;
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = src;
         return;
@@ -51,6 +52,9 @@ export default function StreamLoop({
         testBandwidth: false,
         maxBufferLength: CLIP_SECONDS + 4,
         maxMaxBufferLength: CLIP_SECONDS + 8,
+        // Keep the whole clip buffered so each loop replays from memory
+        // instead of downloading it again.
+        backBufferLength: CLIP_SECONDS + 4,
       });
       // Left alone, hls.js starts on the lowest rendition and ramps up, but a
       // looping clip replays from its buffer and never ramps — tiles stayed
@@ -84,23 +88,19 @@ export default function StreamLoop({
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("ended", onEnded);
 
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!attached) await attach();
-          // Autoplay can still be refused (e.g. battery saver); the poster stays up.
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+    const unregister = registerLoop(video, {
+      play: async () => {
+        attaching ??= attach();
+        await attaching;
+        // Autoplay can still be refused (e.g. battery saver); the poster stays up.
+        if (!cancelled) video.play().catch(() => {});
       },
-      { rootMargin: "200px 0px" },
-    );
-    observer.observe(video);
+      pause: () => video.pause(),
+    });
 
     return () => {
       cancelled = true;
-      observer.disconnect();
+      unregister();
       video.removeEventListener("loadedmetadata", toStart);
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("ended", onEnded);

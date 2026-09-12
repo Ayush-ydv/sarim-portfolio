@@ -21,7 +21,11 @@ export function toEmbedUrl(url: string) {
   }
   const vimeo = vimeoId(url);
   if (vimeo) return `https://player.vimeo.com/video/${vimeo}?autoplay=1`;
-  if (url.includes("cloudflarestream.com") || url.includes("videodelivery.net")) {
+  if (
+    url.includes("mediadelivery.net") ||
+    url.includes("cloudflarestream.com") ||
+    url.includes("videodelivery.net")
+  ) {
     return `${url}${url.includes("?") ? "&" : "?"}autoplay=true`;
   }
   return url;
@@ -89,25 +93,35 @@ export function videoPosterUrl(url: string) {
     .replace(FILE_EXTENSION, ".jpg");
 }
 
+const BUNNY_HOST = /https:\/\/(vz-[a-z0-9-]+\.b-cdn\.net)\//;
+const BUNNY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Legacy Cloudflare Stream videos, readable until every item has moved to Bunny.
 const STREAM_HOST = /https:\/\/(customer-[a-z0-9]+\.cloudflarestream\.com)\//;
 
-// HLS manifest for an uploaded Stream video. The account's customer host is
-// read from the embed or poster URL already stored on the item.
+// HLS stream for an uploaded video. Bunny ids are UUIDs; the CDN host comes
+// from the stored poster URL, or the env var when that poster was replaced.
 export function streamHlsUrl(item: {
   streamVideoId: string | null;
   mediaUrl: string | null;
   thumbnailUrl: string | null;
 }) {
-  if (!item.streamVideoId) return null;
+  const id = item.streamVideoId;
+  if (!id) return null;
+  if (BUNNY_ID.test(id)) {
+    const host =
+      item.thumbnailUrl?.match(BUNNY_HOST)?.[1] ?? process.env.BUNNY_STREAM_CDN_HOST;
+    return host ? `https://${host}/${id}/playlist.m3u8` : null;
+  }
   const host =
     item.mediaUrl?.match(STREAM_HOST)?.[1] ?? item.thumbnailUrl?.match(STREAM_HOST)?.[1];
-  return host ? `https://${host}/${item.streamVideoId}/manifest/video.m3u8` : null;
+  return host ? `https://${host}/${id}/manifest/video.m3u8` : null;
 }
 
-// Posters are Stream thumbnails taken at ?time=Ns; that moment is also where
-// a homepage loop starts, so the clip opens on the frame chosen as the poster.
+// The poster's moment in the video, which is also where a homepage loop
+// starts, so the clip opens on the poster frame. Bunny posters carry it as
+// #t=N (Bunny renders that frame itself); old Stream posters as ?time=Ns.
 export function thumbnailTime(url: string | null | undefined) {
-  const match = url?.match(/[?&]time=(\d+(?:\.\d+)?)s/);
+  const match = url?.match(/(?:[?&]time=|#t=)(\d+(?:\.\d+)?)/);
   return match ? Number(match[1]) : 0;
 }
 

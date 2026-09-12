@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getStreamVideoStatus } from "@/lib/cloudflareStream";
+import { getBunnyVideoStatus } from "@/lib/bunnyStream";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const status = await getStreamVideoStatus(uid);
+    const status = await getBunnyVideoStatus(uid);
     return NextResponse.json(status);
   } catch (error) {
     return NextResponse.json(
