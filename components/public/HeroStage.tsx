@@ -39,7 +39,6 @@ export default function HeroStage({
   alt,
   initialShape,
   lockShape,
-  isMotion,
   mediaClassName,
   fallback,
   children,
@@ -49,7 +48,6 @@ export default function HeroStage({
   initialShape: HeroShape;
   /** YouTube/Vimeo iframes can't be measured, so their guess is final. */
   lockShape: boolean;
-  isMotion: boolean;
   mediaClassName: string;
   fallback: ReactNode;
   children: ReactNode;
@@ -116,16 +114,6 @@ export default function HeroStage({
               />
             ) : (
               fallback
-            )}
-
-            {isMotion && (
-              <span className="label-caps absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-background/85 px-3.5 py-2 text-foreground backdrop-blur-sm md:bottom-5 md:left-5">
-                <span aria-hidden className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 animate-ping rounded-full bg-red-500/60" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-red-500" />
-                </span>
-                Showreel
-              </span>
             )}
           </div>
         </div>

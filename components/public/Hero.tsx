@@ -40,7 +40,6 @@ export default function Hero({
           alt={fullName}
           initialShape={initialShape}
           lockShape={Boolean(embed)}
-          isMotion={Boolean(embed) || isVideo}
           // Keep faces in frame when a portrait is cropped to the card.
           mediaClassName={embed || isVideo ? "object-cover" : "object-cover object-[50%_28%]"}
           fallback={
