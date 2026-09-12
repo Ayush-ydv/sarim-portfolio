@@ -6,20 +6,26 @@ import type Hls from "hls.js";
 import { registerLoop } from "@/components/motion/playbackCoordinator";
 
 const CLIP_SECONDS = 8;
+const MP4_QUALITIES = [360, 480, 720];
 
 // Loops a short muted window of an uploaded video, for collage tiles.
-// The stream is HLS, which only Safari plays natively, so elsewhere hls.js is
-// loaded on demand and capped to the tile's size — a grid of tiles then pulls
-// small renditions instead of full 1080p. The playback coordinator decides
-// when each tile plays (only the few most visible at once), and the player
-// isn't created until a tile first plays. Reduced motion keeps the poster.
+// Bunny videos play their plain MP4 copy in a native <video>: no player
+// script, no per-tile streaming buffers, just the browser's own optimized
+// media engine. The quality is the smallest that covers the tile, with
+// lower ones as fallbacks. Other videos fall back to HLS via hls.js.
+// The playback coordinator decides when each tile plays (only the few
+// nearest the middle of the screen), and nothing loads until a tile first
+// plays. Reduced motion keeps the poster.
 export default function StreamLoop({
-  src,
+  mp4Base,
+  hlsSrc,
   poster,
   start = 0,
   className = "",
 }: {
-  src: string;
+  /** e.g. https://vz-….b-cdn.net/<id>/play_ — quality + ".mp4" is appended. */
+  mp4Base: string | null;
+  hlsSrc: string | null;
   poster: string | null;
   start?: number;
   className?: string;
@@ -29,7 +35,7 @@ export default function StreamLoop({
 
   useEffect(() => {
     const video = ref.current;
-    if (!video || reduceMotion) return;
+    if (!video || reduceMotion || (!mp4Base && !hlsSrc)) return;
     // React sets `muted` as a property only; browsers autoplay muted media only.
     video.muted = true;
 
@@ -37,7 +43,23 @@ export default function StreamLoop({
     let attaching: Promise<void> | null = null;
     let cancelled = false;
 
-    const attach = async () => {
+    const attachMp4 = (base: string) => {
+      // The tile's short side decides the quality ("360p" = 360px short side).
+      const shortSide = Math.min(video.clientWidth, video.clientHeight);
+      const best = MP4_QUALITIES.findIndex((q) => q >= shortSide);
+      const picked = best === -1 ? MP4_QUALITIES.length - 1 : best;
+      // Preferred quality first, then lower ones in case a small upload
+      // never got the higher copy.
+      for (const q of MP4_QUALITIES.slice(0, picked + 1).reverse()) {
+        const source = document.createElement("source");
+        source.src = `${base}${q}p.mp4#t=${start}`;
+        source.type = "video/mp4";
+        video.appendChild(source);
+      }
+      video.load();
+    };
+
+    const attachHls = async (src: string) => {
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = src;
         return;
@@ -45,21 +67,16 @@ export default function StreamLoop({
       const { default: HlsClass } = await import("hls.js");
       if (cancelled || !HlsClass.isSupported()) return;
       const player = new HlsClass({
-        // Loading starts manually below, once the rendition has been chosen.
         autoStartLoad: false,
         capLevelToPlayerSize: true,
         ignoreDevicePixelRatio: true,
         testBandwidth: false,
         maxBufferLength: CLIP_SECONDS + 4,
         maxMaxBufferLength: CLIP_SECONDS + 8,
-        // Keep the whole clip buffered so each loop replays from memory
-        // instead of downloading it again.
         backBufferLength: CLIP_SECONDS + 4,
       });
-      // Left alone, hls.js starts on the lowest rendition and ramps up, but a
-      // looping clip replays from its buffer and never ramps — tiles stayed
-      // blurry, or with a high estimate stuck at 1080p. Pick the smallest
-      // rendition that covers the tile, then start loading from the clip start.
+      // Pick the smallest rendition that covers the tile, then load from the
+      // clip start (left alone, a looping clip never ramps up in quality).
       player.on(HlsClass.Events.MANIFEST_PARSED, () => {
         const fits = player.levels.findIndex(
           (level) => level.width >= video.clientWidth && level.height >= video.clientHeight,
@@ -72,6 +89,11 @@ export default function StreamLoop({
       player.loadSource(src);
       player.attachMedia(video);
       hls = player;
+    };
+
+    const attach = async () => {
+      if (mp4Base) attachMp4(mp4Base);
+      else if (hlsSrc) await attachHls(hlsSrc);
     };
 
     const toStart = () => {
@@ -106,7 +128,7 @@ export default function StreamLoop({
       video.removeEventListener("ended", onEnded);
       hls?.destroy();
     };
-  }, [src, start, reduceMotion]);
+  }, [mp4Base, hlsSrc, start, reduceMotion]);
 
   return (
     <video

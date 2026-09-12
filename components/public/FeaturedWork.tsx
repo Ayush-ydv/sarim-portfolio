@@ -9,6 +9,7 @@ import {
   isVertical,
   splitTitle,
   streamHlsUrl,
+  streamMp4Base,
   thumbnailTime,
   videoThumbnail,
 } from "@/lib/media";
@@ -20,11 +21,14 @@ const zoom =
 function TileMedia({ item, index }: { item: FeaturedItem; index: number }) {
   const poster = videoThumbnail(item);
 
-  const hls = item.mediaType === "VIDEO_UPLOAD" ? streamHlsUrl(item) : null;
-  if (hls) {
+  const upload = item.mediaType === "VIDEO_UPLOAD";
+  const mp4Base = upload ? streamMp4Base(item) : null;
+  const hls = upload ? streamHlsUrl(item) : null;
+  if (mp4Base || hls) {
     return (
       <StreamLoop
-        src={hls}
+        mp4Base={mp4Base}
+        hlsSrc={hls}
         poster={poster}
         start={thumbnailTime(item.thumbnailUrl)}
         className={zoom}
@@ -109,12 +113,15 @@ export default function FeaturedWork({ items }: { items: FeaturedItem[] }) {
             <Reveal
               key={item.id}
               delay={(index % 3) * 0.08}
-              className="mb-3 break-inside-avoid md:mb-4"
+              // Phones skip the fade-in, so it never competes with a video
+              // starting up (the !important beats the animation's inline style).
+              className="mb-3 break-inside-avoid md:mb-4 max-sm:!translate-y-0 max-sm:!opacity-100 max-sm:![transform:none]"
             >
               <Link
                 href={`/${item.section.slug}#${item.id}`}
                 aria-label={`${project} — ${item.section.navLabel}`}
-                className={`group relative block overflow-hidden rounded-xl bg-foreground ${aspect}`}
+                // Containment keeps a tile's repaints from touching the page.
+                className={`group relative block overflow-hidden rounded-xl bg-foreground [contain:layout_paint] ${aspect}`}
               >
                 <TileMedia item={item} index={index} />
                 {/* Captions reveal on hover; touch screens can't hover, so

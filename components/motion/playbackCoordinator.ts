@@ -1,33 +1,46 @@
-// Decides which looping collage tiles may play. Decoding many videos at once
-// is what makes a page stutter: phones have only a few hardware decoders and
-// fall back to slow software decoding for the rest. So only the most-visible
-// few tiles play; the others hold their poster or last frame.
+// Decides which looping collage tiles may play. Decoding several videos at
+// once is what makes scrolling stutter: phones have only a few hardware
+// decoders and fall back to slow software decoding for the rest. So only the
+// tiles nearest the middle of the screen play — one on phones and weaker
+// devices, three on larger screens — and the rest hold their poster.
 
-type Loop = { ratio: number; playing: boolean; play: () => void; pause: () => void };
+type Loop = { el: Element; ratio: number; playing: boolean; play: () => void; pause: () => void };
 
 const loops = new Map<Element, Loop>();
 let observer: IntersectionObserver | null = null;
+let frame = 0;
 
-// A tile must be at least this visible to play.
-const MIN_VISIBLE = 0.35;
+// A tile must be at least half visible to play.
+const MIN_VISIBLE = 0.5;
 
 function playLimit() {
-  const connection = (
-    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-  ).connection;
+  if (document.hidden) return 0;
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+    deviceMemory?: number;
+  };
   // Data saver or a very slow connection: posters only.
-  if (connection?.saveData || /2g/.test(connection?.effectiveType ?? "")) return 0;
-  return window.matchMedia("(max-width: 767px)").matches ? 2 : 4;
+  if (nav.connection?.saveData || /2g/.test(nav.connection?.effectiveType ?? "")) return 0;
+  const phone = window.matchMedia("(max-width: 767px)").matches;
+  const weak = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+  return phone || weak ? 1 : 3;
 }
 
 function update() {
-  const limit = document.hidden ? 0 : playLimit();
-  // Most visible first; ties keep page order, since Map keeps insertion order.
+  frame = 0;
+  const middle = window.innerHeight / 2;
+  const distance = (loop: Loop) => {
+    const rect = loop.el.getBoundingClientRect();
+    return Math.abs(rect.top + rect.height / 2 - middle);
+  };
+  // Only visible tiles are measured, so this stays cheap while scrolling.
   const winners = new Set(
     [...loops.values()]
       .filter((loop) => loop.ratio >= MIN_VISIBLE)
-      .sort((a, b) => b.ratio - a.ratio)
-      .slice(0, limit),
+      .map((loop) => ({ loop, d: distance(loop) }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, playLimit())
+      .map(({ loop }) => loop),
   );
   for (const loop of loops.values()) {
     const shouldPlay = winners.has(loop);
@@ -35,6 +48,12 @@ function update() {
     if (!shouldPlay && loop.playing) loop.pause();
     loop.playing = shouldPlay;
   }
+}
+
+// Re-rank at most once per frame; the most-centered tile changes as the
+// page scrolls even when no tile crosses a visibility threshold.
+function scheduleUpdate() {
+  if (!frame) frame = requestAnimationFrame(update);
 }
 
 function getObserver() {
@@ -45,22 +64,25 @@ function getObserver() {
           const loop = loops.get(entry.target);
           if (loop) loop.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
         }
-        update();
+        scheduleUpdate();
       },
-      { threshold: [0, MIN_VISIBLE, 0.6, 0.85, 1] },
+      { threshold: [0, 0.25, MIN_VISIBLE, 0.75, 1] },
     );
-    document.addEventListener("visibilitychange", update);
+    document.addEventListener("visibilitychange", scheduleUpdate);
+    window.addEventListener("scroll", () => {
+      if ([...loops.values()].some((loop) => loop.ratio > 0)) scheduleUpdate();
+    }, { passive: true });
   }
   return observer;
 }
 
 /** Registers a looping video; returns the cleanup function. */
 export function registerLoop(el: Element, handlers: { play: () => void; pause: () => void }) {
-  loops.set(el, { ratio: 0, playing: false, ...handlers });
+  loops.set(el, { el, ratio: 0, playing: false, ...handlers });
   getObserver().observe(el);
   return () => {
     observer?.unobserve(el);
     loops.delete(el);
-    update();
+    scheduleUpdate();
   };
 }

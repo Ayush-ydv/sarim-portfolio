@@ -118,6 +118,19 @@ export function streamHlsUrl(item: {
   return host ? `https://${host}/${id}/manifest/video.m3u8` : null;
 }
 
+// Bunny also keeps plain MP4 copies (play_360p.mp4, play_480p.mp4, …).
+// Collage previews play those directly: a native <video> is far lighter
+// than an HLS player per tile. Returns the URL prefix; add "360p.mp4".
+export function streamMp4Base(item: {
+  streamVideoId: string | null;
+  thumbnailUrl: string | null;
+}) {
+  const id = item.streamVideoId;
+  if (!id || !BUNNY_ID.test(id)) return null;
+  const host = item.thumbnailUrl?.match(BUNNY_HOST)?.[1] ?? process.env.BUNNY_STREAM_CDN_HOST;
+  return host ? `https://${host}/${id}/play_` : null;
+}
+
 // The poster's moment in the video, which is also where a homepage loop
 // starts, so the clip opens on the poster frame. Bunny posters carry it as
 // #t=N (Bunny renders that frame itself); old Stream posters as ?time=Ns.
