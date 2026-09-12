@@ -9,11 +9,9 @@ import type { NavLink } from "@/lib/nav";
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function HeaderShell({
-  name,
   links,
   ctaLabel,
 }: {
-  name: string;
   links: NavLink[];
   ctaLabel: string;
 }) {
@@ -64,7 +62,7 @@ export default function HeaderShell({
             onClick={closeMenu}
             className="justify-self-start font-display text-xl tracking-tight text-foreground"
           >
-            {name}
+            Home
           </Link>
 
           <nav aria-label="Primary" className="hidden md:block">

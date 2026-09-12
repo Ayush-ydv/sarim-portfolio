@@ -7,13 +7,8 @@ export default async function Header() {
     getVisibleSections(),
     getSiteSettings(),
   ]);
-  const name =
-    [settings.heroNameLine1, settings.heroNameLine2].filter(Boolean).join(" ") ||
-    "Portfolio";
-
   return (
     <HeaderShell
-      name={name}
       ctaLabel={settings.ctaButtonLabel}
       links={buildNavLinks(sections)}
     />
