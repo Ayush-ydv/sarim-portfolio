@@ -204,6 +204,12 @@ async function apply() {
       console.log(`✗ still processing on Bunny, left on Stream: ${item.title}`);
       continue;
     }
+    // The tus upload's filename label overrides the title set at creation,
+    // so give each Bunny video its real title and description here.
+    await updateBunnyVideo(entry.guid, {
+      title: item.title,
+      description: item.description ?? undefined,
+    });
     const start = thumbnailTime(item.thumbnailUrl);
     const { embedUrl } = bunnyUrls(entry.guid);
     await prisma.galleryItem.update({
